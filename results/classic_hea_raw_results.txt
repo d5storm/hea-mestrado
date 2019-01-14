@@ -1,0 +1,12 @@
+CyberShake_30.xml  10.15 5.05585
+CyberShake_30.xml  10.8167 1.64803
+CyberShake_30.xml  10.8167 1.71113
+CyberShake_30.xml  10.1667 3.56991
+CyberShake_30.xml  10.2333 2.22118
+CyberShake_50.xml  13.95 3.63943
+CyberShake_50.xml  13.8833 6.54502
+CyberShake_50.xml  13.45 16.0618
+CyberShake_50.xml  13.95 3.66152
+CyberShake_50.xml  13.9667 3.97271
+CyberShake_100.xml  24.5833 68.1007
+CyberShake_100.xml  

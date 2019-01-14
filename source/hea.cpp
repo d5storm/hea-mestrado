@@ -19,7 +19,7 @@ struct Settings_struct {
     int print_gen;                   // What generation will be printed
     bool verbose, start_heuristic;  // verbose = print type, start_heuristic = Initial Population type
 
-    long seed;      // Random Seed
+    int seed;      // Random Seed
 
     double delta = 0.0; // acceptance criteria for Elite-Set (based on distance)
     double lambda;  // read and write constant
@@ -499,6 +499,8 @@ void setupCmd(int argc, char **argv, string &name_workflow, string &name_cluster
         cmd.add(arg1);
         ValueArg<string> arg2("c", "cluster", "Name of virtual cluster file", true, "file", "string");
         cmd.add(arg2);
+        ValueArg<string> arg3("s", "seed", "Value of seed", true, "file", "string");
+        cmd.add(arg3);
         SwitchArg verbose_arg("v", "verbose", "Output info", cmd, false);
 
         // Parse the args.
@@ -507,6 +509,8 @@ void setupCmd(int argc, char **argv, string &name_workflow, string &name_cluster
         // Get the value parsed by each arg.
         name_workflow = arg1.getValue();
         name_cluster = arg2.getValue();
+
+        setting->seed = stoi(arg3.getValue());
         setting->verbose = verbose_arg.getValue();
 
     } catch (ArgException &e) {  // catch any exceptions
@@ -526,6 +530,8 @@ int main(int argc, char **argv) {
 
     setupCmd(argc, argv, name_workflow, name_cluster);
 
+    srandom(setting->seed);
+
     auto best = run(name_workflow, name_cluster);
 
     best.computeFitness(true, true);
@@ -540,7 +546,7 @@ int main(int argc, char **argv) {
     }
 
     
-    cout << "Best fitness: " << best.fitness / 60.0 << "(min)" << " Runtime: " << elapseSecs << "(sec)" << endl;
+    cout << best.fitness / 60.0 << " " << elapseSecs / 60.0 << endl;
         
 
 
