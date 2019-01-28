@@ -124,6 +124,12 @@ Chromosome HEFT(Data * data) {
 }
 
 
+// Random Constructor
+
+Chromosome randomConstructor(Data * data){
+
+}
+
 /* Call MinMin */
 Chromosome minMinHeuristic(Data *data) {
     list<int> task_list;
@@ -131,6 +137,12 @@ Chromosome minMinHeuristic(Data *data) {
     for (auto info : data->task_map)
         task_list.push_back(info.second.id);
     task_list.sort([&](const int &a, const int &b) { return data->height[a] < data->height[b]; });
+
+    cout << "Testing..." << endl;
+
+    for (auto task : task_list)
+        cout << "Height: " << data->height[task] << endl;
+    exit(1);
 
     list<int> avail_tasks;
 
@@ -374,7 +386,8 @@ Chromosome run(string name_workflow, string name_cluster)  {
 
     vector<Chromosome> Population;
     vector<Chromosome> Elite_set;
-
+    Chromosome minminChr(minMinHeuristic(data));
+    exit(1);
     // Set Delta
     setting->delta = data->size / 4.0;
 
@@ -390,7 +403,8 @@ Chromosome run(string name_workflow, string name_cluster)  {
     };
 
     // == Start initial population == //
-    Chromosome minminChr(minMinHeuristic(data));
+
+
     Chromosome heftChr(HEFT(data));
 
 
@@ -523,8 +537,9 @@ int main(int argc, char **argv) {
 
     clock_t begin = clock();
 
-
     string name_workflow, name_cluster;
+
+
 
     setting = new Settings_struct();
 

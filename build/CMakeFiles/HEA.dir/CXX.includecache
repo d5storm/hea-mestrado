@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/murilo/Mestrado/hea-new/include/Chromosome.h
+/home/murilo/mestrado/hea-mestrado/include/Chromosome.h
 iostream
 -
 vector
@@ -20,9 +20,9 @@ algorithm
 random
 -
 Data.h
-/home/murilo/Mestrado/hea-new/include/Data.h
+/home/murilo/mestrado/hea-mestrado/include/Data.h
 
-/home/murilo/Mestrado/hea-new/include/Data.h
+/home/murilo/mestrado/hea-mestrado/include/Data.h
 iostream
 -
 vector
@@ -46,7 +46,7 @@ boost/algorithm/string.hpp
 map
 -
 
-/home/murilo/Mestrado/hea-new/include/HEFT.h
+/home/murilo/mestrado/hea-mestrado/include/HEFT.h
 string
 -
 iostream
@@ -56,9 +56,9 @@ algorithm
 tclap/CmdLine.h
 -
 Data.h
-/home/murilo/Mestrado/hea-new/include/Data.h
+/home/murilo/mestrado/hea-mestrado/include/Data.h
 Chromosome.h
-/home/murilo/Mestrado/hea-new/include/Chromosome.h
+/home/murilo/mestrado/hea-mestrado/include/Chromosome.h
 boost/bimap.hpp
 -
 boost/range/algorithm/copy.hpp
@@ -68,7 +68,7 @@ boost/range/adaptors.hpp
 boost/range/join.hpp
 -
 
-/home/murilo/Mestrado/hea-new/include/MinMin.h
+/home/murilo/mestrado/hea-mestrado/include/MinMin.h
 string
 -
 iostream
@@ -78,9 +78,9 @@ algorithm
 tclap/CmdLine.h
 -
 Data.h
-/home/murilo/Mestrado/hea-new/include/Data.h
+/home/murilo/mestrado/hea-mestrado/include/Data.h
 Chromosome.h
-/home/murilo/Mestrado/hea-new/include/Chromosome.h
+/home/murilo/mestrado/hea-mestrado/include/Chromosome.h
 boost/bimap.hpp
 -
 boost/range/algorithm/copy.hpp
@@ -90,11 +90,11 @@ boost/range/adaptors.hpp
 boost/range/join.hpp
 -
 
-/home/murilo/Mestrado/hea-new/source/hea.cpp
+/home/murilo/mestrado/hea-mestrado/source/hea.cpp
 iostream
 -
 ../include/HEFT.h
-/home/murilo/Mestrado/hea-new/include/HEFT.h
+/home/murilo/mestrado/hea-mestrado/include/HEFT.h
 ../include/MinMin.h
-/home/murilo/Mestrado/hea-new/include/MinMin.h
+/home/murilo/mestrado/hea-mestrado/include/MinMin.h
 

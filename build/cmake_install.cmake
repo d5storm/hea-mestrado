@@ -1,4 +1,4 @@
-# Install script for directory: /home/murilo/Mestrado/hea-new
+# Install script for directory: /home/murilo/mestrado/hea-mestrado
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/murilo/Mestrado/hea-new/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/murilo/mestrado/hea-mestrado/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
