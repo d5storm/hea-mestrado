@@ -126,7 +126,30 @@ Chromosome HEFT(Data * data) {
 
 // Random Constructor
 
-Chromosome randomConstructor(Data * data){
+void randomConstructor(Data * data){
+    cout << "Random Constructor" << endl;
+    unordered_map<int, list<int>> task_map;
+    int maxHeight = 0;
+    for (auto task : data->task_map){
+        auto id = task.second.id;
+        auto height = data->height[id];
+        if(height > maxHeight) maxHeight = height;
+        auto list = task_map[height];
+        list.push_back(id);
+        task_map[height] = list;
+    }
+
+    cout << "MAX HEIGHT: " << maxHeight << endl;
+
+    // for (auto tuple : task_map){
+    //     cout << "First: " << tuple.first << " Second: [ ";
+    //     for (auto seconds : task_map[tuple.first])
+    //         cout << "," << seconds;
+    //     cout << "]" << endl;
+    // }
+
+
+    cout << "end" << endl;
 
 }
 
@@ -138,11 +161,6 @@ Chromosome minMinHeuristic(Data *data) {
         task_list.push_back(info.second.id);
     task_list.sort([&](const int &a, const int &b) { return data->height[a] < data->height[b]; });
 
-    cout << "Testing..." << endl;
-
-    for (auto task : task_list)
-        cout << "Height: " << data->height[task] << endl;
-    exit(1);
 
     list<int> avail_tasks;
 
@@ -386,7 +404,10 @@ Chromosome run(string name_workflow, string name_cluster)  {
 
     vector<Chromosome> Population;
     vector<Chromosome> Elite_set;
-    Chromosome minminChr(minMinHeuristic(data));
+
+    Grasp grasp(data, 0.9, setting->lambda);
+
+    grasp.Construct();
     exit(1);
     // Set Delta
     setting->delta = data->size / 4.0;
@@ -404,7 +425,7 @@ Chromosome run(string name_workflow, string name_cluster)  {
 
     // == Start initial population == //
 
-
+    Chromosome minminChr(minMinHeuristic(data));
     Chromosome heftChr(HEFT(data));
 
 
@@ -538,8 +559,6 @@ int main(int argc, char **argv) {
     clock_t begin = clock();
 
     string name_workflow, name_cluster;
-
-
 
     setting = new Settings_struct();
 

@@ -6,5 +6,5 @@ CXX_FLAGS =  -O3  -Wall -std=c++11
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/murilo/mestrado/hea-mestrado/include 
+CXX_INCLUDES = -I/mnt/d/mestrado/hea-mestrado/include 
 

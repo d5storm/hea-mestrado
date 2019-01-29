@@ -12,6 +12,7 @@
 #include <tclap/CmdLine.h>
 #include "Data.h"
 #include "Chromosome.h"
+#include "Grasp.h"
 #include <boost/bimap.hpp>
 #include <boost/range/algorithm/copy.hpp>
 #include <boost/range/adaptors.hpp>
