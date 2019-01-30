@@ -1,6 +1,7 @@
 #include <iostream>
 #include "../include/HEFT.h"
 #include "../include/MinMin.h"
+#include "../include/Problem.h"
 
 typedef vector<Chromosome> vect_chrom_type;
 
@@ -405,10 +406,6 @@ Chromosome run(string name_workflow, string name_cluster)  {
     vector<Chromosome> Population;
     vector<Chromosome> Elite_set;
 
-    Grasp grasp(data, 0.9, setting->lambda);
-
-    grasp.Construct();
-    exit(1);
     // Set Delta
     setting->delta = data->size / 4.0;
 
@@ -426,8 +423,12 @@ Chromosome run(string name_workflow, string name_cluster)  {
     // == Start initial population == //
 
     Chromosome minminChr(minMinHeuristic(data));
-    Chromosome heftChr(HEFT(data));
 
+    Chromosome heftChr(HEFT(data));
+    minminChr.print();
+    cout << "****" << endl;
+    heftChr.print();
+    exit(1);
 
     Population.push_back(minminChr);
     Population.push_back(heftChr);
@@ -565,6 +566,10 @@ int main(int argc, char **argv) {
     setupCmd(argc, argv, name_workflow, name_cluster);
 
     srandom(setting->seed);
+    cout << "Starting test..." << endl;
+    Problem p(name_workflow, name_cluster);
+    p.Simulate();
+    // exit(1);
 
     auto best = run(name_workflow, name_cluster);
 
