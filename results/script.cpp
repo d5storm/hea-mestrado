@@ -45,18 +45,33 @@ int main(int argc, char **argv){
 			if (!(iss >> instanceName >> fo >> time)) { break; }
 			timeSum += time;
 			foSum += fo;
+			Fos.push_back(fo);
 			if(fo < foMin) foMin = fo;
 		}
-		double E;
+
+		// cin.get();
+		double V;
 		double foAVG = foSum / (double)seedNumber;
 		for( int i = 0; i < seedNumber; i++){
-			E += pow((Fos[i] - foAVG), 2) / (double)seedNumber;
+			double first = (Fos[i] - foAVG);
+			cout << "First: " << first << endl;
+			V += pow(first, 2);
 		}
-		double dp = sqrt(E);
+		V = V / (double)seedNumber;
+		double dp = sqrt(V);
 		double cv = dp / foAVG;
+
+		cout << instanceName << " FoSum: " << foSum << " foMin: " << foMin << " foAVG: " << foAVG << " timeSum: " << timeSum << " timeAVG: " << timeSum/seedNumber << " V: " << V << " DP: " << dp << " cv: " << cv << endl;
+		cin.get();
+
 		ostringstream oss;
 		oss << instanceName << "," << foMin << "," << foSum/seedNumber << "," << cv << "," << timeSum/seedNumber << "\n";
 		Out << oss.str();
+
+		Fos.clear();
+		foSum = 0.0;
+		timeSum = 0.0;
+
 		//exit(1);
 	}
 	

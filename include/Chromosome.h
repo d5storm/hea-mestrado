@@ -184,7 +184,7 @@ public:
 
         cout << endl;
 
-        /*for(auto info : data->vm_map){
+        for(auto info : data->vm_map){
             auto vm = info.second;
             cout << "[" << vm.id << "]" << " <" << vm.name << "> : ";
             auto f = scheduler.find(vm.id);
@@ -193,7 +193,8 @@ public:
                     cout << task_tag << " ";
             }
             cout << endl;
-        }*/
+        }
+
         cout << "Files: " << endl;
         for (auto info: data->vm_map) {
             auto vm = info.second;
@@ -206,20 +207,30 @@ public:
             }
             cout << endl;
         }
+        cout << "\n\n\n\nStartTimeVector:" << endl;
+        for(int i = 0; i < this->start_time_vector.size(); i++){
+            cout << start_time_vector[i] << " ";
+        }
+        cout << endl;
 
+        cout << "\n\n\n\nTimeVector:" << endl;
+        for(int i = 0; i < this->time_vector.size(); i++){
+            cout << time_vector[i] << " ";
+        }
+        cout << endl;
 
-        /*for(auto info : data->file_map){
-            auto file = info.second;
-            int vm_id = file.is_static ? file.static_vm : allocation[file.id];
-            cout << "["  << vm_id << ", " << file.name << "]" << " ";
-        }*/
-        //cout << endl;
+        // for(auto info : data->file_map){
+        //     auto file = info.second;
+        //     int vm_id = file.is_static ? file.static_vm : allocation[file.id];
+        //     cout << "["  << vm_id << ", " << file.name << "]" << " ";
+        // }
+        // cout << endl;
 
-        /*cout << "Task Sequence: " << endl;
+        cout << "Task Sequence: " << endl;
         for(auto task_id : ordering)
             if(task_id != data->id_root && task_id && data->id_sink)
                 cout << data->task_map.find(task_id)->second.name <<  ", ";
-        cout << endl;*/
+        cout << endl;
 
     }
 
@@ -401,7 +412,6 @@ private:
 
             read_time += ceil(TT(file, vm, vm_file) + (file.size * lambda));
         }
-
         return read_time;
 
     }  //Write time

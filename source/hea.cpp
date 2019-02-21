@@ -399,6 +399,7 @@ inline void localSearch(vect_chrom_type &Population, Data *data) {
 
 Chromosome run(string name_workflow, string name_cluster)  {
 
+    
     // Load input Files and the data structures used by the algorithms
     Data *data = new Data(name_workflow, name_cluster);
 
@@ -421,14 +422,9 @@ Chromosome run(string name_workflow, string name_cluster)  {
     };
 
     // == Start initial population == //
-
     Chromosome minminChr(minMinHeuristic(data));
-
     Chromosome heftChr(HEFT(data));
-    minminChr.print();
-    cout << "****" << endl;
-    heftChr.print();
-    exit(1);
+
 
     Population.push_back(minminChr);
     Population.push_back(heftChr);
@@ -566,18 +562,44 @@ int main(int argc, char **argv) {
     setupCmd(argc, argv, name_workflow, name_cluster);
 
     srandom(setting->seed);
-    cout << "Starting test..." << endl;
-    Problem p(name_workflow, name_cluster);
-    p.Simulate();
-    // exit(1);
+    Problem * bestSolution;
+    double bestSolValue = 99999999999.9;
+    for(int i = 0; i < 10; i++){
+        // cout << "Starting test..." << endl;
+        Problem * p = new Problem(name_workflow, name_cluster);
+        double solValue = p->createSolution(0.3);
+        if(!p->checkFeasible()){
+            cout << "booom" << endl;
+            cin.get();
+        }
+        if (solValue < bestSolValue){
+            bestSolution = p;
+            bestSolValue = solValue;
+        } else{
+            delete(p);
+        }
 
+        // cout << "Found Solution: " << solValue << endl;
+        // cin.get();
+    }
+    clock_t end = clock();
+    double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
+    cout << bestSolValue / 60.0 << " " << elapseSecs / 60.0 << endl;
+    // bestSolution->print();
+    exit(1);
+    // cin.get();
+    cout << "*********************************" << endl;
     auto best = run(name_workflow, name_cluster);
 
     best.computeFitness(true, true);
 
-    clock_t end = clock();
+    cout << "His Best: " << best.fitness / 60.0 << endl;
+    // best.print();
+    exit(1);
 
-    double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
+    end = clock();
+
+    // double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
 
     if (setting->verbose){
         cout << "\t **** HEA **** " << endl;
