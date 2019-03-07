@@ -37,6 +37,33 @@ public:
 	int alocated_vm_id = -1;
 	vector<Item*> input, output;
 
+	bool checkJobFeasibleOnMachine(int vm_id){
+		// cout << "JobNameTested: " << this->name << endl;
+		// cout << "testing feasible on Machine: " << vm_id << endl;
+		if(rootJob){
+		// cout << "IsRoot" << endl;
+			for(int f = 0; f < input.size(); f++){
+				if(input[f]->is_static){
+					bool feasible = false;
+					// cout << "StaticVMs( " << input[f]->static_vms.size() << "):";
+					if(input[f]->alocated_vm_id < 0){
+						for(int vm = 0; vm < input[f]->static_vms.size(); vm++){
+							// cout << input[f]->static_vms[vm] << " "; 
+							if(input[f]->static_vms[vm] == vm_id){
+								feasible = true;
+								break;
+							}
+						}
+						// cout << endl;
+						if(!feasible)
+							return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
 	bool checkInputNeed(int item_id){
 		for(int i = 0; i < input.size(); i++){
 			if(input[i]->id == item_id)
@@ -100,7 +127,13 @@ public:
 	}
 
 	bool pushJob(Job * job, int write_vm_id, double minSpam){
+		if(!job->checkJobFeasibleOnMachine(this->id)){
+			cout << "not feasible on machine" << endl;
+			return false;
+		}
+		// cout << "feasible on machine" << endl;
 		// cout << "MinSpam: " << minSpam << endl;
+		cout << "JobID: " << job->id << endl;
 		for(int i = 0; i < job->input.size(); i++){ // checando se todos os arquivos de input que nao sao estaticos ja foram produzidos
 			// cout << "inputFileID: " << job->input[i]->id << " isStatic: " << job->input[i]->is_static << endl;
 			if(job->input[i]->is_static == false && job->input[i]->alocated_vm_id < 0){
@@ -138,7 +171,7 @@ public:
 		// cin.get();
 
 		double writetime = 0.0;
-		if(write_vm_id != -1){
+		if(write_vm_id != -1 && write_vm_id != this->id){
 			for(int i = 0; i < job->output.size(); i++){
 				int minBandwidthVm = this->id;
 				if(job->output[i]->VMsBandwidth[write_vm_id] < job->output[i]->VMsBandwidth[this->id])
@@ -222,11 +255,12 @@ public:
 			vector<int> outputVmDestination;
 			vector<double> cost;
 			for(int i = 0; i < jobs.size(); i++){
-				// cout << "i: " << i << endl;
+				// cout << "i: " << i  << " JobName: "<< jobs[i]->name << endl;
 				if (jobs[i]->alocated)
 					continue;
 				for(int m = 0; m < vms.size(); m++){
 					for(int d = 0; d < vms.size(); d++){
+
 						double minSpam = getJobConflictMinSpam(jobs[i]);
 						if(minSpam < 0) break; 
 						bool pushed = vms[m]->pushJob(jobs[i], d, minSpam);
@@ -263,6 +297,7 @@ public:
 								outputVmDestination.push_back(d);
 							}
 						}
+						// cout << "tested!" << endl;
 						vms[m]->popJob(jobs[i]->id);
 						// cout << "Spam After Removal: " << vms[m]->calculateLocalspam() << endl;
 						// cin.get();
@@ -284,6 +319,7 @@ public:
 				chosenMovement = random() % maxClPos;
 
 			// cout << "Chosen Movement: " << chosenMovement << endl;
+			// cout << "CLSIZE: " << CL.size() << endl;
 			bool moveDone = doMovement(jobVmDestination[chosenMovement], outputVmDestination[chosenMovement], CL[chosenMovement]);
 			if(moveDone){
 				// cout << "JobID: " << CL[chosenMovement]->id << " Was Inserted!" << endl;
@@ -344,6 +380,22 @@ public:
 	}
 
 	bool checkFeasible(){
+		for(int i = 0; i < files.size(); i++){  // checando se os arquivos static estao alocados nas máquinas possíveis.
+			if(files[i]->is_static){
+				bool feasible_alocation = false;
+				for(int m = 0; m < files[i]->static_vms.size(); m++){
+					if(files[i]->alocated_vm_id == files[i]->static_vms[m]){
+						feasible_alocation = true;
+						break;
+					}
+				}
+				if(!feasible_alocation){
+					cout << "Arquivo: " << i << " nao alocado numa static_vms!" << endl;
+					return false;
+				}
+			}
+		}
+
 		for(int i = 0; i < files.size(); i++){  // checando se todos os arquivos estao alocados a alguma maquina
 			if(files[i]->alocated_vm_id < 0){
 				cout << "Arquivo: " << i << " nao alocado!" << endl;
@@ -434,14 +486,14 @@ public:
 		Machine * aux = vms[0];
 		double minSpam;
 		minSpam = getJobConflictMinSpam(jobs[0]);
+		cout << "Job[0] name: " << jobs[0]->name << endl;
 		aux->pushJob(jobs[0], 2, minSpam);
 		aux = vms[2];
-		// cin.get();
 		minSpam = getJobConflictMinSpam(jobs[1]);
+		cout << "Job[1] name: " << jobs[1]->name << endl;
 		aux->pushJob(jobs[1], -1, minSpam);
-		// cin.get();
-		aux = vms[2];
 		minSpam = getJobConflictMinSpam(jobs[2]);
+		cout << "Job[2] name: " << jobs[2]->name << endl;
 		aux->pushJob(jobs[2], -1, minSpam);
 		double makespam = calculateMakespam();
 		cout << "My Makespam: " << makespam << endl;
@@ -503,10 +555,13 @@ public:
 			
 			Item * afile;
 			if(i < sfile_size){
-				int n_static_vms = stoi(strs[3]);
+				int n_static_vms = stoi(strs[2]);
+				// cout << "n_static: " << n_static_vms << endl;
 				vector<int> static_vms;
-				for(int j = 4; j <= 3 + n_static_vms; j++)
+				for(int j = 3; j < 3 + n_static_vms; j++){
 					static_vms.push_back(stoi(strs[j]));
+					// cout << strs[j] << endl;
+				}
 				afile = new Item(file_name, i, file_size, static_vms);
 			} else{
 				afile = new Item(file_name, i, file_size);
@@ -519,7 +574,7 @@ public:
 		// 	cout << this->files[i]->name << endl;
 		// }
 		getline(in_file, line); //reading blank line
-
+		// cout << "!!!" << endl;
 
 		for(int i = 0; i < job_size; i++){
 			getline(in_file, line);
@@ -534,13 +589,15 @@ public:
 			vector<Item*> output;
 			//reading input files
 			bool is_root_job = true;
+			int total_not_roots = 0;
 			for(int j = 0; j < n_input_files; j++){
 				getline(in_file, line);
 				Item * inputItem = getFileByName(line);
-				if(!inputItem->is_static) is_root_job = false;
+				if(!inputItem->is_static) total_not_roots++;
 				input.push_back(inputItem);
 			}
-
+			if(total_not_roots == n_input_files)
+				is_root_job = false;
 			//reading output files
 			for(int j = 0; j < n_output_files; j++){
 				getline(in_file, line);

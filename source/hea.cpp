@@ -567,6 +567,8 @@ int main(int argc, char **argv) {
     for(int i = 0; i < 10; i++){
         // cout << "Starting test..." << endl;
         Problem * p = new Problem(name_workflow, name_cluster);
+        p->Simulate();
+        exit(1);
         double solValue = p->createSolution(0.3);
         if(!p->checkFeasible()){
             cout << "booom" << endl;
@@ -584,9 +586,10 @@ int main(int argc, char **argv) {
     }
     clock_t end = clock();
     double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
+    cout << bestSolValue << " " << elapseSecs << endl;
     cout << bestSolValue / 60.0 << " " << elapseSecs / 60.0 << endl;
-    // bestSolution->print();
-    exit(1);
+    bestSolution->print();
+    // exit(1);
     // cin.get();
     cout << "*********************************" << endl;
     auto best = run(name_workflow, name_cluster);
@@ -594,7 +597,7 @@ int main(int argc, char **argv) {
     best.computeFitness(true, true);
 
     cout << "His Best: " << best.fitness / 60.0 << endl;
-    // best.print();
+    best.print();
     exit(1);
 
     end = clock();

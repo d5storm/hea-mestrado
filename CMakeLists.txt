@@ -5,4 +5,5 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3  -Wall -std=c++11")
 # bring the headers into the project
 include_directories(include)
 
-add_executable(HEA ./source/hea.cpp)
+#add_executable(HEA ./source/hea.cpp)
+add_executable(HEA /home/murilostockinger/Mestrado/hea-mestrado/source/hea.cpp)

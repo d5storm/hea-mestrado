@@ -1,0 +1,313 @@
+../Inputs/toy/m3/toy_5_A.wds
+#!# 10
+Tasks:
+1: t0 t1 
+2: 
+3: 
+Files: 
+1: d1 d2 
+2: 
+3: 
+10	0.624876
+../Inputs/toy/m3/toy_5_B.wds
+#!# 12
+Tasks:
+1: 
+2: t0 t1 
+3: 
+Files: 
+1: 
+2: d1 d2 
+3: 
+12	0.673417
+../Inputs/toy/m3/toy_5_C.wds
+#!# 13
+Tasks:
+1: 
+2: t0 
+3: 
+Files: 
+1: 
+2: d3 
+3: 
+13	0.550463
+../Inputs/toy/m3/toy_7_A.wds
+#!# 20
+Tasks:
+1: t0 
+2: t1 
+3: 
+Files: 
+1: d2 d3 
+2: d4 
+3: 
+20	0.806807
+../Inputs/toy/m3/toy_7_B.wds
+#!# 16
+Tasks:
+1: t0 
+2: t1 
+3: t2 
+Files: 
+1: d1 d3 
+2: d2 
+3: 
+16	1.00462
+../Inputs/toy/m3/toy_7_C.wds
+#!# 13
+Tasks:
+1: t0 
+2: t1 t2 
+3: 
+Files: 
+1: 
+2: d1 d2 d3 
+3: 
+13	0.877329
+../Inputs/toy/m3/toy_10_A.wds
+#!# 18
+Tasks:
+1: t1 
+2: t0 t2 t3 
+3: 
+Files: 
+1: 
+2: d2 d3 d4 d5 
+3: 
+18	1.36112
+../Inputs/toy/m3/toy_10_B.wds
+#!# 11
+Tasks:
+1: t0 
+2: t2 t1 
+3: 
+Files: 
+1: d1 d2 d3 
+2: d4 d5 d6 
+3: 
+11	1.40756
+../Inputs/toy/m3/toy_10_C.wds
+#!# 20
+Tasks:
+1: 
+2: t0 t1 t2 t3 
+3: 
+Files: 
+1: 
+2: d1 d2 d3 d4 d5 
+3: 
+20	1.10024
+../Inputs/toy/m3/toy_15_A.wds
+#!# 12
+Tasks:
+1: t1 t3 t4 
+2: t2 
+3: t0 
+Files: 
+1: d3 d4 d6 d7 d8 d9 
+2: d5 
+3: 
+12	2.28342
+../Inputs/toy/m3/toy_15_B.wds
+#!# 9
+Tasks:
+1: t0 t3 t4 
+2: t2 
+3: t1 
+Files: 
+1: d1 d2 d3 d7 d9 
+2: d6 
+3: d4 d5 
+9	2.56497
+../Inputs/toy/m3/toy_15_C.wds
+#!# 15
+Tasks:
+1: t0 t2 t4 
+2: t1 t3 
+3: 
+Files: 
+1: d2 d3 d5 d6 d7 d8 d9 
+2: d4 
+3: 
+15	1.78284
+../Inputs/toy/m5/toy_5_A.wds
+#!# 10
+Tasks:
+1: t0 t1 
+2: 
+3: 
+4: 
+5: 
+Files: 
+1: d1 d2 
+2: 
+3: 
+4: 
+5: 
+10	0.719105
+../Inputs/toy/m5/toy_5_B.wds
+#!# 8
+Tasks:
+1: t0 t1 
+2: 
+3: 
+4: 
+5: 
+Files: 
+1: d1 d2 
+2: 
+3: 
+4: 
+5: 
+8	0.670933
+../Inputs/toy/m5/toy_5_C.wds
+#!# 8
+Tasks:
+1: t0 
+2: 
+3: 
+4: 
+5: 
+Files: 
+1: d3 
+2: 
+3: 
+4: 
+5: 
+8	0.582828
+../Inputs/toy/m5/toy_7_A.wds
+#!# 24
+Tasks:
+1: t0 t1 
+2: 
+3: 
+4: 
+5: 
+Files: 
+1: d2 d3 d4 
+2: 
+3: 
+4: 
+5: 
+24	0.880216
+../Inputs/toy/m5/toy_7_B.wds
+#!# 26
+Tasks:
+1: t1 
+2: 
+3: 
+4: t0 
+5: t2 
+Files: 
+1: d2 
+2: d1 d3 
+3: 
+4: 
+5: 
+26	1.07486
+../Inputs/toy/m5/toy_7_C.wds
+#!# 15
+Tasks:
+1: t0 t1 t2 
+2: 
+3: 
+4: 
+5: 
+Files: 
+1: d1 d2 d3 
+2: 
+3: 
+4: 
+5: 
+15	0.869739
+../Inputs/toy/m5/toy_10_A.wds
+#!# 22
+Tasks:
+1: t0 t3 
+2: 
+3: t2 
+4: t1 
+5: 
+Files: 
+1: d2 d3 d4 d5 
+2: 
+3: 
+4: 
+5: 
+22	1.42311
+../Inputs/toy/m5/toy_10_B.wds
+#!# 13
+Tasks:
+1: t2 
+2: 
+3: t0 
+4: t1 
+5: 
+Files: 
+1: d5 d6 
+2: 
+3: d1 d2 d3 
+4: d4 
+5: 
+13	1.72774
+../Inputs/toy/m5/toy_10_C.wds
+#!# 45
+Tasks:
+1: t0 t2 
+2: 
+3: 
+4: t1 t3 
+5: 
+Files: 
+1: d1 d2 
+2: 
+3: 
+4: d3 d4 d5 
+5: 
+45	1.51972
+../Inputs/toy/m5/toy_15_A.wds
+#!# 12
+Tasks:
+1: t2 t3 t4 
+2: 
+3: t1 
+4: t0 
+5: 
+Files: 
+1: d3 d4 d5 d6 d7 d8 d9 
+2: 
+3: 
+4: 
+5: 
+12	2.28471
+../Inputs/toy/m5/toy_15_B.wds
+#!# 9
+Tasks:
+1: t0 t3 t4 
+2: t2 
+3: t1 
+4: 
+5: 
+Files: 
+1: d1 d2 d3 d7 d9 
+2: d6 
+3: d4 d5 
+4: 
+5: 
+9	2.98923
+../Inputs/toy/m5/toy_15_C.wds
+#!# 15
+Tasks:
+1: t0 t2 t4 
+2: t1 t3 
+3: 
+4: 
+5: 
+Files: 
+1: d2 d3 d5 d6 d7 d8 d9 
+2: d4 
+3: 
+4: 
+5: 
+15	2.33039
+
