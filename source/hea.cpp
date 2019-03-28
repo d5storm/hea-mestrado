@@ -2,6 +2,7 @@
 #include "../include/HEFT.h"
 #include "../include/MinMin.h"
 #include "../include/Problem.h"
+#include "../include/Grasp.h"
 
 typedef vector<Chromosome> vect_chrom_type;
 
@@ -562,55 +563,37 @@ int main(int argc, char **argv) {
     setupCmd(argc, argv, name_workflow, name_cluster);
 
     srandom(setting->seed);
-    Problem * bestSolution;
-    double bestSolValue = 99999999999.9;
-    for(int i = 0; i < 10; i++){
-        // cout << "Starting test..." << endl;
-        Problem * p = new Problem(name_workflow, name_cluster);
-        p->Simulate();
-        exit(1);
-        double solValue = p->createSolution(0.3);
-        if(!p->checkFeasible()){
-            cout << "booom" << endl;
-            cin.get();
-        }
-        if (solValue < bestSolValue){
-            bestSolution = p;
-            bestSolValue = solValue;
-        } else{
-            delete(p);
-        }
-
-        // cout << "Found Solution: " << solValue << endl;
-        // cin.get();
-    }
+    Problem * emptyProblem = new Problem(name_workflow, name_cluster);
+    Grasp * g = new Grasp(emptyProblem, 1.0);
+    Problem * bestSol = g->start();
     clock_t end = clock();
     double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
-    cout << bestSolValue << " " << elapseSecs << endl;
-    cout << bestSolValue / 60.0 << " " << elapseSecs / 60.0 << endl;
-    bestSolution->print();
+    double bestSolValue = bestSol->calculateMakespam();
+    cout << bestSolValue / 60.0 << " " << elapseSecs << endl;
     // exit(1);
-    // cin.get();
-    cout << "*********************************" << endl;
+    bestSol->printAlloc();
+    cout << "********************" << endl;
+    begin = clock();
     auto best = run(name_workflow, name_cluster);
 
     best.computeFitness(true, true);
-
-    cout << "His Best: " << best.fitness / 60.0 << endl;
+    end = clock();
+    elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
+    cout << "Him: " << best.fitness / 60.0 << " " << elapseSecs << endl;
     best.print();
     exit(1);
 
-    end = clock();
+    // end = clock();
 
-    // double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
+    // // double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
 
-    if (setting->verbose){
-        cout << "\t **** HEA **** " << endl;
-        best.print();
-    }
+    // if (setting->verbose){
+    //     cout << "\t **** HEA **** " << endl;
+    //     best.print();
+    // }
 
     
-    cout << best.fitness / 60.0 << " " << elapseSecs / 60.0 << endl;
+    // cout << best.fitness / 60.0 << " " << elapseSecs / 60.0 << endl;
         
 
 

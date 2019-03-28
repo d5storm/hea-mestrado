@@ -5,72 +5,122 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
-#include <tclap/CmdLine.h>
-#include "MinMin.h"
+#include "Problem.h"
+#include "LocalSearch.h"
 
 
-using namespace TCLAP;
 using namespace std;
 
 class Grasp{
 
     public:
-        Data* data;
         double alpha;
-        double lambda;
-
+        Problem * blankProblem;
+        vector<LocalSearch *> localSearch;
         //virtual ~Chromosome();
         virtual ~Grasp() {
             // TODO Auto-generated destructor stub
         }
-
-        // Random Constructor
         
-        Grasp(Data* data, double alpha, double lambda) : 
-            data(data), alpha(alpha), lambda(lambda) {
-
+        Grasp(Problem * problem, double alpha){
+            this->blankProblem = problem;
+            this->alpha = alpha;
         }
 
-        void Construct(){
-            cout << "Random Constructor" << endl;
-            unordered_map<int, list<int>> task_map;
-            int maxHeight = 0;
-            for (auto task : data->task_map){
-                auto id = task.second.id;
-                auto height = data->height[id];
-                if(height > maxHeight) maxHeight = height;
-                auto list = task_map[height];
-                list.push_back(id);
-                task_map[height] = list;
+        Problem * start(){
+            Problem * p = new Problem(*this->blankProblem);           
+            double bestSolValue = 9999999999.0;
+            Problem * bestSolution = new Problem(*p);
+            for(int j = 0; j < 100; j++){
+                p = new Problem(*this->blankProblem);
+                p->createSolution(this->alpha);
+                p->printAlloc();
+                continue;
+                if (p->calculateMakespam() < bestSolValue){
+                    cout << "NEW BEST@@@@: " << p->calculateMakespam() / 60.0<< endl;
+                    delete bestSolution;
+                    bestSolution = new Problem(*p);
+                    bestSolValue = p->calculateMakespam();
+                }
+                bool improvement = true;
+                while(improvement){
+                    improvement = false;
+                    for(int i = 0; i < p->alloc.size(); i++){
+                        for (int j = 0; j < p->alloc.size(); j++){
+                            if(i == j) continue;
+                            Problem * backup = new Problem(*p);
+                            bool done = p->realocate(i, j);
+                            if(done){
+                                if(!p->checkFeasible()){
+                                    cout << "booom1" << endl;
+                                    cin.get();
+                                }
+
+                                double solValue = p->calculateMakespam();
+                                if(solValue > backup->calculateMakespam()){
+                                    delete p;
+                                    p = backup;
+                                } else{
+                                    delete backup;
+                                }
+
+                                if (solValue < bestSolValue){
+                                    cout << "NEW BEST!!!!: " << p->calculateMakespam() / 60.0<< endl;
+                                    delete bestSolution;
+                                    bestSolution = new Problem(*p);
+                                    bestSolValue = p->calculateMakespam();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // cout << "FirstSolution: " << endl;
+                // p->printAlloc();
+                // for(int i = 0; i < 100; i++){
+                //     // int perturbationId = random() % 3;
+                //     // int perturbationSize = random() % p->alloc.size();
+                //     // cout << "TotalPerturbations: " << perturbationSize << endl;
+                //     // cout << "Cost Before Perturbation: " << p->calculateMakespam() << endl;
+                //     double solValue;
+                //     // while(perturbationSize > 0){
+                //         // p->printAlloc();
+                //         int posPerturbation = random() % p->alloc.size();
+                //         bool done = p->forceRelocate(posPerturbation);
+                //         if(!p->checkFeasible()){
+                //             cout << "booom1" << endl;
+                //             cin.get();
+                //         }
+                //         solValue = p->calculateMakespam();
+                //         if (solValue < bestSolValue){
+                //             cout << "NEW BEST!!!!: " << solValue / 60.0<< endl;
+                //             delete bestSolution;
+                //             bestSolution = new Problem(*p);
+                //             bestSolValue = solValue;
+                //         }
+                //         // perturbationSize--;
+                //     // }
+                
+                //     // if(!p->checkFeasible()){
+                //     //     cout << "booom2" << endl;
+                //     //     cin.get();
+                //     // }
+
+                //     // solValue = p->calculateMakespam();
+                //     // if (solValue < bestSolValue){
+                //     //     delete bestSolution;
+                //     //     cout << "NEW BEST!!!!: " << solValue / 60.0<< endl;
+                //     //     bestSolution = new Problem(*p);
+                //     //     bestSolValue = solValue;
+                //     // }
+                // }
+                delete p;
+                
+                // cin.get();
             }
-            
-            for(int i = 1; i <= maxHeight; i++){
-                vector<double> ft_vector(data->size, 0);
-                vector<double> queue(data->vm_size, 0);
-                vector<int> file_place(data->size, 0);
-                list<int> task_ordering(0);
-
-                scheduleTask(data, task_map[i], ft_vector, queue, file_place, task_ordering,lambda);
-
-            }
-
-            cout << "MAX HEIGHT: " << maxHeight << endl;
-
-            // for (auto tuple : task_map){
-            //     cout << "First: " << tuple.first << " Second: [ ";
-            //     for (auto seconds : task_map[tuple.first])
-            //         cout << "," << seconds;
-            //     cout << "]" << endl;
-            // }
-
-
-            cout << "end" << endl;
-
-        }
-    private:
-        void scheduleTask(Data *data, list<int> avail_tasks, vector<double> &ft_vector, vector<double> &queue, vector<int> &file_place,
-         list<int> &task_ordering, double lambda){
-
+            // exit(1);
+            // cin.get();
+            return bestSolution;
         }
 };
 

@@ -1,0 +1,72 @@
+Cluster:
+
+0 m3.medium 1.53 80 4.0 0.1
+1 m3.large 0.77 120 9.0 0.1
+2 m3.xlarge 0.38 160 10.0 0.1
+
+Instance:
+
+file0 2048 2 0 1
+file1 512
+file2 256
+file3 256
+file4 1024
+
+t0 task0 180 1 1
+file0
+file1
+t1 task1 560 1 2
+file0
+file2
+file3
+t2 task2 300 2 1
+file1
+file2
+file4
+
+t0 1
+t2
+t1 1
+t2
+t2 0 
+
+Minha Soluçao:
+
+771 12.85
+VMs:
+0: 
+1: t0( 0,196 ) t1( 196,628 ) 
+2: t2( 628,771 ) 
+file: 0 VM: 1
+file: 1 VM: 2
+file: 2 VM: 1
+file: 3 VM: 1
+file: 4 VM: 1
+
+
+Solução Luan:
+
+839 13.9833
+VMs:
+0: t0( 0,404 )
+1:
+2: t1( 0,725 ) t2( 725,839 )
+file: 0 VM: 0
+file: 1 VM: 2
+file: 2 VM: 2
+file: 3 VM: 2
+file: 4 VM: 2
+
+Minha Solução Simulando Luan:
+
+839 13.9833
+VMs:
+0: t0( 0,404 ) 
+1: 
+2: t1( 0,725 ) t2( 725,839 ) 
+file: 0 VM: 0
+file: 1 VM: 2
+file: 2 VM: 2
+file: 3 VM: 2
+file: 4 VM: 2
+

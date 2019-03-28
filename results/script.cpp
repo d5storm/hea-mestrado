@@ -54,15 +54,15 @@ int main(int argc, char **argv){
 		double foAVG = foSum / (double)seedNumber;
 		for( int i = 0; i < seedNumber; i++){
 			double first = (Fos[i] - foAVG);
-			cout << "First: " << first << endl;
+			// cout << "First: " << first << endl;
 			V += pow(first, 2);
 		}
 		V = V / (double)seedNumber;
 		double dp = sqrt(V);
 		double cv = dp / foAVG;
 
-		cout << instanceName << " FoSum: " << foSum << " foMin: " << foMin << " foAVG: " << foAVG << " timeSum: " << timeSum << " timeAVG: " << timeSum/seedNumber << " V: " << V << " DP: " << dp << " cv: " << cv << endl;
-		cin.get();
+		// cout << instanceName << " FoSum: " << foSum << " foMin: " << foMin << " foAVG: " << foAVG << " timeSum: " << timeSum << " timeAVG: " << timeSum/seedNumber << " V: " << V << " DP: " << dp << " cv: " << cv << endl;
+		// cin.get();
 
 		ostringstream oss;
 		oss << instanceName << "," << foMin << "," << foSum/seedNumber << "," << cv << "," << timeSum/seedNumber << "\n";

@@ -1,43 +1,44 @@
+Cluster:
 
+0 um 0.2 1000 50.0 0.1
+1 dois 0.05 1000 25.0 0.1
+2 tres 0.3 1000 50.0 0.1
 
+Instance:
 
-Minha Soluçao:
+d0 100 1 1
+d1 100 
+d2 100 
 
-771 12.85
+t0 task0 10 1 1
+d0
+d1
+t1 task1 15.4 1 1
+d0
+d2
+
+t0 0
+t1 0
+
+Minha Solução:
+
+2 0.0333333
 VMs:
-0: 
-1: t0( 0,196 ) t1( 196,628 ) 
-2: t2( 628,771 ) 
+ID: 0 Name:um:
+ID: 1 Name:dois: t1( 0,1 ) t0( 1,2 )
+ID: 2 Name:tres:
 file: 0 VM: 1
-file: 1 VM: 2
+file: 1 VM: 1
 file: 2 VM: 1
-file: 3 VM: 1
-file: 4 VM: 1
 
 
 Solução Luan:
 
-839 13.9833
+2 0.0333333
 VMs:
-0: t0( 0,404 )
-1:
-2: t1( 0,725 ) t2( 725,839 )
-file: 0 VM: 0
-file: 1 VM: 2
-file: 2 VM: 2
-file: 3 VM: 2
-file: 4 VM: 2
-
-Minha Solução Simulando Luan:
-
-839 13.9833
-VMs:
-0: t0( 0,404 ) 
-1: 
-2: t1( 0,725 ) t2( 725,839 ) 
-file: 0 VM: 0
-file: 1 VM: 2
-file: 2 VM: 2
-file: 3 VM: 2
-file: 4 VM: 2
-
+ID: 0 Name:um:
+ID: 1 Name:dois: t1( 0,1 ) t0( 1,2 )
+ID: 2 Name:tres:
+file: 0 VM: 1
+file: 1 VM: 1
+file: 2 VM: 1

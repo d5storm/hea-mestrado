@@ -169,55 +169,55 @@ public:
 
     void print() {
 
-        cout << "#!# " << fitness << endl;
-        cout << "Tasks: " << endl;
-        for (auto info : data->vm_map) {
-            auto vm = info.second;
-            cout << vm.id << ": ";
-            auto f = scheduler.find(vm.id);
-            if (f != scheduler.end()) {
-                for (auto task_tag: f->second)
-                    cout << task_tag << " ";
-            }
-            cout << endl;
-        }
+        // cout << "#!# " << fitness << endl;
+        // cout << "Tasks: " << endl;
+        // for (auto info : data->vm_map) {
+        //     auto vm = info.second;
+        //     cout << vm.id << ": ";
+        //     auto f = scheduler.find(vm.id);
+        //     if (f != scheduler.end()) {
+        //         for (auto task_tag: f->second)
+        //             cout << task_tag << " ";
+        //     }
+        //     cout << endl;
+        // }
 
-        cout << endl;
+        // cout << endl;
 
-        for(auto info : data->vm_map){
-            auto vm = info.second;
-            cout << "[" << vm.id << "]" << " <" << vm.name << "> : ";
-            auto f = scheduler.find(vm.id);
-            if(f != scheduler.end()) {
-                for (auto task_tag : f->second)
-                    cout << task_tag << " ";
-            }
-            cout << endl;
-        }
+        // for(auto info : data->vm_map){
+        //     auto vm = info.second;
+        //     cout << "[" << vm.id << "]" << " <" << vm.name << "> : ";
+        //     auto f = scheduler.find(vm.id);
+        //     if(f != scheduler.end()) {
+        //         for (auto task_tag : f->second)
+        //             cout << task_tag << " ";
+        //     }
+        //     cout << endl;
+        // }
 
-        cout << "Files: " << endl;
-        for (auto info: data->vm_map) {
-            auto vm = info.second;
-            cout << vm.id << ": ";
-            for (auto info : data->file_map) {
-                auto file = info.second;
-                int vm_id = file.is_static ? file.static_vm : allocation[file.id];
-                if (vm_id == vm.id)
-                    cout << file.name << " ";
-            }
-            cout << endl;
-        }
-        cout << "\n\n\n\nStartTimeVector:" << endl;
-        for(int i = 0; i < this->start_time_vector.size(); i++){
-            cout << start_time_vector[i] << " ";
-        }
-        cout << endl;
+        // cout << "Files: " << endl;
+        // for (auto info: data->vm_map) {
+        //     auto vm = info.second;
+        //     cout << vm.id << ": ";
+        //     for (auto info : data->file_map) {
+        //         auto file = info.second;
+        //         int vm_id = file.is_static ? file.static_vm : allocation[file.id];
+        //         if (vm_id == vm.id)
+        //             cout << file.name << " ";
+        //     }
+        //     cout << endl;
+        // }
+        // cout << "\n\n\n\nStartTimeVector:" << endl;
+        // for(int i = 0; i < this->start_time_vector.size(); i++){
+        //     cout << start_time_vector[i] << " ";
+        // }
+        // cout << endl;
 
-        cout << "\n\n\n\nTimeVector:" << endl;
-        for(int i = 0; i < this->time_vector.size(); i++){
-            cout << time_vector[i] << " ";
-        }
-        cout << endl;
+        // cout << "\n\n\n\nTimeVector:" << endl;
+        // for(int i = 0; i < this->time_vector.size(); i++){
+        //     cout << time_vector[i] << " ";
+        // }
+        // cout << endl;
 
         // for(auto info : data->file_map){
         //     auto file = info.second;
@@ -229,7 +229,7 @@ public:
         cout << "Task Sequence: " << endl;
         for(auto task_id : ordering)
             if(task_id != data->id_root && task_id && data->id_sink)
-                cout << data->task_map.find(task_id)->second.name <<  ", ";
+                cout << data->task_map.find(task_id)->second.tag <<  ", ";
         cout << endl;
 
     }
