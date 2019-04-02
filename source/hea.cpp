@@ -564,24 +564,25 @@ int main(int argc, char **argv) {
 
     srandom(setting->seed);
     Problem * emptyProblem = new Problem(name_workflow, name_cluster);
-    Grasp * g = new Grasp(emptyProblem, 1.0);
+    Grasp * g = new Grasp(emptyProblem, 0.3);
     Problem * bestSol = g->start();
     clock_t end = clock();
     double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
     double bestSolValue = bestSol->calculateMakespam();
     cout << bestSolValue / 60.0 << " " << elapseSecs << endl;
     // exit(1);
-    bestSol->printAlloc();
-    cout << "********************" << endl;
-    begin = clock();
-    auto best = run(name_workflow, name_cluster);
+    // bestSol->printAlloc();
+    // bestSol->print();
+    // cout << "********************" << endl;
+    // begin = clock();
+    // auto best = run(name_workflow, name_cluster);
 
-    best.computeFitness(true, true);
-    end = clock();
-    elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
-    cout << "Him: " << best.fitness / 60.0 << " " << elapseSecs << endl;
-    best.print();
-    exit(1);
+    // best.computeFitness(true, true);
+    // end = clock();
+    // elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
+    // cout << "Him: " << best.fitness / 60.0 << " " << elapseSecs << endl;
+    // best.print();
+    // exit(1);
 
     // end = clock();
 

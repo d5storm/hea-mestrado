@@ -127,10 +127,10 @@ public:
 	}
 
 	bool pushJob(Job * job, int write_vm_id, double minSpam){
-		if(!job->checkJobFeasibleOnMachine(this->id)){
-			// cout << "not feasible on machine" << endl;
-			return false;
-		}
+		// if(!job->checkJobFeasibleOnMachine(this->id)){
+		// 	cout << "not feasible on machine" << endl;
+		// 	return false;
+		// }
 		// cout << "feasible on machine" << endl;
 		// cout << "MinSpam: " << minSpam << endl;
 		// cout << "JobID: " << job->id << endl;
@@ -155,16 +155,36 @@ public:
 		// cout << "StartTime: " << startTime << endl;
 		// cin.get();
 		
-
+		
 		
 		double readtime = 0.0; // calculando o tempo de leitura de todos os arquivos de input necessarios caso nao estejam alocados na Maquina
 		for(unsigned int i = 0; i < job->input.size(); i++){
 			if(job->input[i]->alocated_vm_id == this->id)
 				continue;
 			int minBandwidthVm = this->id;
-			if(job->input[i]->VMsBandwidth[job->input[i]->alocated_vm_id] < job->input[i]->VMsBandwidth[this->id])
-				minBandwidthVm = job->input[i]->alocated_vm_id;
-			readtime += job->input[i]->IOTimeCost[minBandwidthVm];
+
+			if(job->input[i]->is_static){
+				bool transferNeed = true;
+				double maxBandwidth = 0.0;
+				int id;
+				for(int j = 0; j < job->input[i]->static_vms.size(); j++){
+					if(this->id == job->input[i]->static_vms[j])
+						transferNeed = false;
+						break;
+					if(job->input[i]->VMsBandwidth[job->input[i]->static_vms[j]] > maxBandwidth){
+						maxBandwidth = job->input[i]->VMsBandwidth[job->input[i]->static_vms[j]];
+						id = job->input[i]->static_vms[j];
+					}
+				}
+
+				if(job->input[i]->VMsBandwidth[id] < job->input[i]->VMsBandwidth[this->id])
+					minBandwidthVm = id;
+				if(transferNeed) readtime += job->input[i]->IOTimeCost[minBandwidthVm];
+			} else{
+				if(job->input[i]->VMsBandwidth[job->input[i]->alocated_vm_id] < job->input[i]->VMsBandwidth[this->id])
+					minBandwidthVm = job->input[i]->alocated_vm_id;
+				readtime += job->input[i]->IOTimeCost[minBandwidthVm];			
+			}
 		}
 
 		// cout << "ReadTime: " << readtime << endl;
@@ -181,6 +201,12 @@ public:
 		}
 		double processtime = ceil(job->base_time * this->slowdown);
 		double finishTime = readtime + writetime + processtime + startTime;
+
+		// if(job->name == "ID00002"){
+		// 	cout << "ProcessMachineID: " <<this->id << " ProcessMAchineName: " << this->name << " writeID: " << write_vm_id << " minSpam: " << minSpam << endl;
+		// 	cout << "start: " << startTime << " read: " << readtime << " process: " << processtime << " write: " << writetime << " fulltime: " << finishTime << endl;
+		// 	cin.get();
+		// }
 
 		timelineStartTime.push_back(startTime);
 		timelineFinishTime.push_back(finishTime);
@@ -688,8 +714,10 @@ public:
 							break;
 						}
 						double insertionCost = calculateMakespam();
-						// cout << "JOB: " << jobs[i]->id << " vmsID: " << vms[m]->id << " InsertionID: " << vms[d]->id <<  " COST: " << insertionCost << endl;
-						// cin.get();
+						// if(jobs[i]->name == "ID00002"){
+						// 	cout << "JOB: " << jobs[i]->id << " vmsID: " << vms[m]->name << " InsertionID: " << vms[d]->id <<  " COST: " << insertionCost << endl;
+						// 	cin.get();
+						// }
 						if(CL.size() == 0){
 							CL.push_back(jobs[i]);
 							jobVmDestination.push_back(m);
@@ -722,15 +750,18 @@ public:
 				}
 			}
 
+			
+			if(CL.size() == 0){
+				cout << "NO POSSIBLE MOVEMENTS!" << endl;
+				cin.get();
+			}
+
 			// cout << "CL size: " << CL.size() << endl;
 			// for(unsigned int c = 0; c < CL.size(); c++){
 			// 	cout << CL[c]->id << " " ;
 			// }
 			// cout << endl;
-			if(CL.size() == 0){
-				cout << "NO POSSIBLE MOVEMENTS!" << endl;
-				cin.get();
-			}
+
 			int chosenMovement;
 			int maxClPos = (int)(CL.size() * alpha);
 			if(maxClPos == 0)
@@ -813,21 +844,21 @@ public:
 	}
 
 	bool checkFeasible(){
-		for(unsigned int i = 0; i < files.size(); i++){  // checando se os arquivos static estao alocados nas máquinas possíveis.
-			if(files[i]->is_static){
-				bool feasible_alocation = false;
-				for(unsigned int m = 0; m < files[i]->static_vms.size(); m++){
-					if(files[i]->alocated_vm_id == files[i]->static_vms[m]){
-						feasible_alocation = true;
-						break;
-					}
-				}
-				if(!feasible_alocation){
-					cout << "Arquivo: " << i << " nao alocado numa static_vms!" << endl;
-					return false;
-				}
-			}
-		}
+		// for(unsigned int i = 0; i < files.size(); i++){  // checando se os arquivos static estao alocados nas máquinas possíveis.
+		// 	if(files[i]->is_static){
+		// 		bool feasible_alocation = false;
+		// 		for(unsigned int m = 0; m < files[i]->static_vms.size(); m++){
+		// 			if(files[i]->alocated_vm_id == files[i]->static_vms[m]){
+		// 				feasible_alocation = true;
+		// 				break;
+		// 			}
+		// 		}
+		// 		if(!feasible_alocation){
+		// 			cout << "Arquivo: " << files[i]->name << " nao alocado numa static_vms!" << endl;
+		// 			return false;
+		// 		}
+		// 	}
+		// }
 
 		for(unsigned int i = 0; i < files.size(); i++){  // checando se todos os arquivos estao alocados a alguma maquina
 			if(files[i]->alocated_vm_id < 0){
@@ -916,19 +947,168 @@ public:
 
 		// createSolution(0.3);
 
-		cout << "Simulations..." << endl;
-		Machine * aux = vms[0];
+		vector<string> order = {"ID00013", "ID00002", "ID00026", "ID00014", "ID00009", "ID00018", "ID00024", "ID00016", "ID00005", "ID00028", 
+		"ID00011", "ID00022", "ID00023", "ID00012", "ID00025", "ID00015", "ID00020", "ID00027", "ID00029", "ID00006", "ID00019", "ID00010", 
+		"ID00017", "ID00003", "ID00007", "ID00008", "ID00004", "ID00021", "ID00000", "ID00001"};
+
+		vector<int> vm_order = {0, 0, 0, 2};
+
+
+		Job * job;
+		Machine * aux;
 		double minSpam;
-		minSpam = getJobConflictMinSpam(jobs[0]);
-		cout << "Job[0] name: " << jobs[0]->name << endl;
-		aux->pushJob(jobs[0], 2, minSpam);
-		aux = vms[2];
-		minSpam = getJobConflictMinSpam(jobs[1]);
-		cout << "Job[1] name: " << jobs[1]->name << endl;
-		aux->pushJob(jobs[1], -1, minSpam);
-		minSpam = getJobConflictMinSpam(jobs[2]);
-		cout << "Job[2] name: " << jobs[2]->name << endl;
-		aux->pushJob(jobs[2], -1, minSpam);
+
+		job = this->getJobByName("ID00013");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("ID00002");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("ID00016");
+		aux = vms[3];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("ID00014");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("ID00018");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("ID00024");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("ID00028");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+		job = this->getJobByName("");
+		aux = vms[0];
+		minSpam = getJobConflictMinSpam(job);
+		aux->pushJob(job, -1, minSpam);
+
+
 		double makespam = calculateMakespam();
 		cout << "My Makespam: " << makespam << endl;
 		this->print();

@@ -31,17 +31,22 @@ class Grasp{
             Problem * p = new Problem(*this->blankProblem);           
             double bestSolValue = 9999999999.0;
             Problem * bestSolution = new Problem(*p);
+            bestSolution->createSolution(this->alpha);
             for(int j = 0; j < 100; j++){
                 p = new Problem(*this->blankProblem);
                 p->createSolution(this->alpha);
-                p->printAlloc();
-                continue;
+                // p->printAlloc();
+                if(!p->checkFeasible()){
+                    cout << "booom1" << endl;
+                    cin.get();
+                }
                 if (p->calculateMakespam() < bestSolValue){
-                    cout << "NEW BEST@@@@: " << p->calculateMakespam() / 60.0<< endl;
+                    // cout << "NEW BEST@@@@: " << p->calculateMakespam() / 60.0<< endl;
                     delete bestSolution;
                     bestSolution = new Problem(*p);
                     bestSolValue = p->calculateMakespam();
                 }
+                continue;
                 bool improvement = true;
                 while(improvement){
                     improvement = false;
