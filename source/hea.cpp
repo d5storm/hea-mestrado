@@ -534,6 +534,8 @@ void setupCmd(int argc, char **argv, string &name_workflow, string &name_cluster
         cmd.add(arg2);
         ValueArg<string> arg3("s", "seed", "Value of seed", true, "file", "string");
         cmd.add(arg3);
+        ValueArg<string> arg4("a", "alpha", "Value of alpha", true, "file", "string");
+        cmd.add(arg4);
         SwitchArg verbose_arg("v", "verbose", "Output info", cmd, false);
 
         // Parse the args.
@@ -544,6 +546,7 @@ void setupCmd(int argc, char **argv, string &name_workflow, string &name_cluster
         name_cluster = arg2.getValue();
 
         setting->seed = stoi(arg3.getValue());
+        setting->alpha = stoi(arg4.getValue()) / 10.0;
         setting->verbose = verbose_arg.getValue();
 
     } catch (ArgException &e) {  // catch any exceptions
@@ -564,16 +567,18 @@ int main(int argc, char **argv) {
 
     srandom(setting->seed);
     Problem * emptyProblem = new Problem(name_workflow, name_cluster);
-    Grasp * g = new Grasp(emptyProblem, 0.3);
+    // cout << "Alpha: " << setting->alpha << endl;
+    Grasp * g = new Grasp(emptyProblem, setting->alpha);
     Problem * bestSol = g->start();
     clock_t end = clock();
     double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
     double bestSolValue = bestSol->calculateMakespam();
-    cout << bestSolValue / 60.0 << " " << elapseSecs << endl;
+    cout << name_workflow << " "<< bestSolValue / 60.0 << " " << elapseSecs << endl;
     // exit(1);
     // bestSol->printAlloc();
     // bestSol->print();
     // cout << "********************" << endl;
+    // cin.get();
     // begin = clock();
     // auto best = run(name_workflow, name_cluster);
 

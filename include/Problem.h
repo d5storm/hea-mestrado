@@ -416,6 +416,65 @@ public:
 		return true;
 	}
 
+	bool swapMachine(int pos){
+		Allocation * swap = this->alloc[pos];
+		Machine * originalAllocationMachine = swap->vms;
+		double originalCost = this->calculateMakespam();
+		for(unsigned int i = 0; i < this->vms.size(); i++){
+			swap->vms = this->vms[i];
+			for(int j = this->alloc.size() - 1; j >= pos; j--)
+				this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
+
+			for(unsigned int j = pos; j < this->alloc.size(); j++){
+				double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
+				this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
+			}
+
+			if(this->calculateMakespam() < originalCost){
+				return true;
+			}
+		}
+		swap->vms = originalAllocationMachine;
+		for(int j = this->alloc.size() - 1; j >= pos; j--)
+				this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
+		for(unsigned int j = pos; j < this->alloc.size(); j++){
+			double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
+			this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
+		}
+		return false;
+	}
+
+	bool swapMachinePair(int pos1, int pos2){
+		Allocation * swap1 = this->alloc[pos1];
+		Allocation * swap2 = this->alloc[pos2];
+		Machine * originalAllocationMachine1 = swap1->vms;
+		Machine * originalAllocationMachine2 = swap2->vms;
+		double originalCost = this->calculateMakespam();
+
+		swap1->vms = originalAllocationMachine2;
+		swap2->vms = originalAllocationMachine1;
+
+		int finalPos = pos1;
+		if (finalPos > pos2) finalPos = pos2;
+		for(int j = this->alloc.size() - 1; j >= finalPos; j--)
+				this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
+		for(unsigned int j = finalPos; j < this->alloc.size(); j++){
+			double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
+			this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
+		}
+		if(this->calculateMakespam() < originalCost)
+			return true;
+		swap1->vms = originalAllocationMachine1;
+		swap2->vms = originalAllocationMachine2;
+		for(int j = this->alloc.size() - 1; j >= finalPos; j--)
+				this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
+		for(unsigned int j = finalPos; j < this->alloc.size(); j++){
+			double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
+			this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
+		}
+		return false;
+	}
+
 	bool realocate(int pos1, int pos2){
 		Allocation * relocation = this->alloc[pos1];
 		// this->printAlloc();

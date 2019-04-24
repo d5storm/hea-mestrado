@@ -32,7 +32,7 @@ class Grasp{
             double bestSolValue = 9999999999.0;
             Problem * bestSolution = new Problem(*p);
             bestSolution->createSolution(this->alpha);
-            for(int j = 0; j < 100; j++){
+            for(int iter = 0; iter < 100; iter++){
                 p = new Problem(*this->blankProblem);
                 p->createSolution(this->alpha);
                 // p->printAlloc();
@@ -41,87 +41,90 @@ class Grasp{
                     cin.get();
                 }
                 if (p->calculateMakespam() < bestSolValue){
-                    // cout << "NEW BEST@@@@: " << p->calculateMakespam() / 60.0<< endl;
                     delete bestSolution;
                     bestSolution = new Problem(*p);
                     bestSolValue = p->calculateMakespam();
                 }
-                continue;
                 bool improvement = true;
+                // cout << "ITERATION: " << iter << " CURRENT BEST SOL VALUE: " << bestSolValue << endl;
                 while(improvement){
                     improvement = false;
-                    for(int i = 0; i < p->alloc.size(); i++){
+                    for(int i = 0; i < p->alloc.size(); i++){ // RELOCATE LOOP START
                         for (int j = 0; j < p->alloc.size(); j++){
                             if(i == j) continue;
                             Problem * backup = new Problem(*p);
                             bool done = p->realocate(i, j);
+                            // delete backup;
+                            // bool done = false;
                             if(done){
+                                
                                 if(!p->checkFeasible()){
                                     cout << "booom1" << endl;
                                     cin.get();
                                 }
-
                                 double solValue = p->calculateMakespam();
-                                if(solValue > backup->calculateMakespam()){
+                                // cout << "A Move was Done! i: " << i << " j: " << j << endl;
+                                // cout << "oldValue: " << backup->calculateMakespam() << " newValue: " << solValue << endl;
+                                // cin.get();
+                                if(solValue >= backup->calculateMakespam()){
                                     delete p;
                                     p = backup;
                                 } else{
+                                    // cout << "RELOCATE IMPROV! Cost: " << p->calculateMakespam()  << endl;
+                                    // cin.get();
                                     delete backup;
-                                }
-
-                                if (solValue < bestSolValue){
-                                    cout << "NEW BEST!!!!: " << p->calculateMakespam() / 60.0<< endl;
-                                    delete bestSolution;
-                                    bestSolution = new Problem(*p);
-                                    bestSolValue = p->calculateMakespam();
-                                }
+                                    improvement = true;
+                                }                                
+                            } else{
+                                delete backup;
                             }
                         }
+                        if(improvement){
+                            break;
+                        }
+                    } // RELOCATE LOOP END
+ 
+                    // cout << "EXAUSTED RELOCATE!" << endl;
+                    // for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
+                    //     Problem * backup = new Problem(*p);
+                    //     improvement = p->swapMachine(i);
+                    //     if(improvement){
+                    //         // cout << "SWAP IMPROV! Cost: " << p->calculateMakespam()  << endl;
+                    //         // cin.get();
+                    //         delete backup;
+                    //         break;
+                    //     } else{
+                    //         delete p;
+                    //         p = backup;
+                    //     }
+                    // } // END SWAP MACHINE LOOP
+
+                    // // cout << "EXAUSTED SWAP MACHINE!" << endl;
+                    // for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
+                    //     for (int j = 0; j < p->alloc.size(); j++){
+                    //         Problem * backup = new Problem(*p);
+                    //         improvement = p->swapMachinePair(i, j);
+                    //         if(improvement){
+                    //             // cout << "SWAP PAIR IMPROV! Cost: " << p->calculateMakespam() << endl;
+                    //             // cin.get();
+                    //             delete backup;
+                    //             break;
+                    //         } else{
+                    //             delete p;
+                    //             p = backup;
+                    //         }
+                    //     }
+                    // } // END SWAP MACHINE LOOP
+                    // cout << "EXAUSTED SWAP PAIR!" << endl;
+                    if(improvement){
+                        if (p->calculateMakespam() < bestSolValue){
+                            delete bestSolution;
+                            bestSolution = new Problem(*p);
+                            bestSolValue = bestSolution->calculateMakespam();
+                        }
                     }
-                }
-
-                // cout << "FirstSolution: " << endl;
-                // p->printAlloc();
-                // for(int i = 0; i < 100; i++){
-                //     // int perturbationId = random() % 3;
-                //     // int perturbationSize = random() % p->alloc.size();
-                //     // cout << "TotalPerturbations: " << perturbationSize << endl;
-                //     // cout << "Cost Before Perturbation: " << p->calculateMakespam() << endl;
-                //     double solValue;
-                //     // while(perturbationSize > 0){
-                //         // p->printAlloc();
-                //         int posPerturbation = random() % p->alloc.size();
-                //         bool done = p->forceRelocate(posPerturbation);
-                //         if(!p->checkFeasible()){
-                //             cout << "booom1" << endl;
-                //             cin.get();
-                //         }
-                //         solValue = p->calculateMakespam();
-                //         if (solValue < bestSolValue){
-                //             cout << "NEW BEST!!!!: " << solValue / 60.0<< endl;
-                //             delete bestSolution;
-                //             bestSolution = new Problem(*p);
-                //             bestSolValue = solValue;
-                //         }
-                //         // perturbationSize--;
-                //     // }
-                
-                //     // if(!p->checkFeasible()){
-                //     //     cout << "booom2" << endl;
-                //     //     cin.get();
-                //     // }
-
-                //     // solValue = p->calculateMakespam();
-                //     // if (solValue < bestSolValue){
-                //     //     delete bestSolution;
-                //     //     cout << "NEW BEST!!!!: " << solValue / 60.0<< endl;
-                //     //     bestSolution = new Problem(*p);
-                //     //     bestSolValue = solValue;
-                //     // }
-                // }
-                delete p;
-                
-                // cin.get();
+                }  
+                delete p;              
             }
             // exit(1);
             // cin.get();
