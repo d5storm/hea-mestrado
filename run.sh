@@ -19,9 +19,9 @@ execpath="./bin/HEA"
 clusters="./input/clusters/cluster.vcl"
 workflows="./input/Workflows/"
 dag=".dag"
-# declare -a wkf=("CyberShake_30.xml" "CyberShake_50.xml" "CyberShake_100.xml" "GENOME.d.351024866.0.dax" "GENOME.d.702049732.0.dax" "Epigenomics_24.xml" "Epigenomics_46.xml" "Epigenomics_100.xml" "Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
+declare -a wkf=("CyberShake_30.xml" "CyberShake_50.xml" "CyberShake_100.xml" "GENOME.d.351024866.0.dax" "GENOME.d.702049732.0.dax" "Epigenomics_24.xml" "Epigenomics_46.xml" "Epigenomics_100.xml" "Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
 # declare -a wkf=("GENOME.d.702049732.0.dax" "Epigenomics_24.xml" "Epigenomics_46.xml" "Epigenomics_100.xml" "Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
-declare -a wkf=("CyberShake_100.xml")
+# declare -a wkf=("CyberShake_100.xml")
 # declare -a wkf=("Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
 trap CTRLC SIGINT
 
