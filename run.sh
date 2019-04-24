@@ -32,7 +32,7 @@ do
 	do
 		for ((  i = 1 ;  i <= 10;  i++  )) 
 		do	
-			echo  -ne $file '\n' & EXEC $execpath -a $a -s $i -c $clusters -w $workflows$file$dag #>> ./results/relocate_testing/"relocate_first_improve.txt"
+			echo  -ne $file '\n' & EXEC $execpath -a $a -s $i -c $clusters -w $workflows$file$dag >> ./results/relocate_testing/"relocate_first_improve.txt"
 		done			
 	done
 	echo "Creating .csv ...\n" & EXEC ./results/script ./results/relocate_testing/"relocate_first_improve.txt" ./results/relocate_testing/"relocate_first_improve.csv" 10

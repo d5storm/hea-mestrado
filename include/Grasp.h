@@ -86,27 +86,27 @@ class Grasp{
 
                     if(lsImprovement) improvement = true;
                     lsImprovement = false;
-                    // cout << "EXAUSTED RELOCATE! p->cost was: " << p->calculateMakespam() << endl;
-                    for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
-                        Problem * backup = new Problem(*p);
-                        lsImprovement = p->swapMachine(i);
-                        if(!p->checkFeasible()){
-                            cout << "booom1" << endl;
-                            cin.get();
-                        }
-                        if(lsImprovement){
-                            // cout << "SWAP IMPROV! Cost: " << p->calculateMakespam()  << endl;
-                            // cin.get();
-                            delete backup;
-                            break;
-                        } else{
-                            delete p;
-                            p = backup;
-                        }
-                    } // END SWAP MACHINE LOOP
+                    // // cout << "EXAUSTED RELOCATE! p->cost was: " << p->calculateMakespam() << endl;
+                    // for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
+                    //     Problem * backup = new Problem(*p);
+                    //     lsImprovement = p->swapMachine(i);
+                    //     if(!p->checkFeasible()){
+                    //         cout << "booom1" << endl;
+                    //         cin.get();
+                    //     }
+                    //     if(lsImprovement){
+                    //         // cout << "SWAP IMPROV! Cost: " << p->calculateMakespam()  << endl;
+                    //         // cin.get();
+                    //         delete backup;
+                    //         break;
+                    //     } else{
+                    //         delete p;
+                    //         p = backup;
+                    //     }
+                    // } // END SWAP MACHINE LOOP
 
-                    if(lsImprovement) improvement = true;
-                    lsImprovement = false;
+                    // if(lsImprovement) improvement = true;
+                    // lsImprovement = false;
                     // cout << "EXAUSTED SWAP MACHINE! p->cost was: " << p->calculateMakespam() << endl;
                     // for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
                     //     for (int j = 0; j < p->alloc.size(); j++){
