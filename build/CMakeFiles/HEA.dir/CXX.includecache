@@ -90,6 +90,18 @@ algorithm
 Problem.h
 /home/murilostockinger/Mestrado/hea-mestrado/include/Problem.h
 
+/home/murilostockinger/Mestrado/hea-mestrado/include/MILS.h
+string
+-
+iostream
+-
+algorithm
+-
+Problem.h
+/home/murilostockinger/Mestrado/hea-mestrado/include/Problem.h
+LocalSearch.h
+/home/murilostockinger/Mestrado/hea-mestrado/include/LocalSearch.h
+
 /home/murilostockinger/Mestrado/hea-mestrado/include/MinMin.h
 string
 -
@@ -141,4 +153,6 @@ iostream
 /home/murilostockinger/Mestrado/hea-mestrado/include/Problem.h
 ../include/Grasp.h
 /home/murilostockinger/Mestrado/hea-mestrado/include/Grasp.h
+../include/MILS.h
+/home/murilostockinger/Mestrado/hea-mestrado/include/MILS.h
 

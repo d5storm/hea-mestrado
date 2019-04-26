@@ -309,18 +309,7 @@ public:
 		return true;
 	}
 
-	void relocateFromPos(int pos){
-		int originalSize = alloc.size();
-		for(int i = alloc.size() - 1; i >= pos; i--){
-			// cout << "Alou!" << endl;
-			alloc.back()->vms->popJob(alloc[i]->job->id);
-			// cout << "JobID: " << alloc.back()->job->name << endl;
-			alloc.pop_back();
-		}
-		// cout << "size: " << originalSize - pos << endl;
-		// cin.get();
-		this->rebuildSolution(originalSize - pos);
-	}
+	
 
 	bool changeAllocOrder(int pos1, int pos2){
 		Job * job1 = alloc[pos1]->job;
@@ -510,10 +499,14 @@ public:
 		// this->printAlloc();
 		// cin.get();
 		// cout << "PosRemove: " << pos << " PosInsert: " << insertionPos << endl;
-
-		for(int j = this->alloc.size() - 1; j >= pos1; j--)
-			this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
-
+		bool teste = true;
+		for(int j = this->alloc.size() - 1; j >= pos1; j--){
+			teste = this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
+			if(!teste){
+				cout << "NAO CONSEGUIU POP!" << endl;
+				cin.get();
+			}
+		}
 
 		for(unsigned int j = pos1; j < this->alloc.size(); j++){
 			double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
@@ -633,16 +626,30 @@ public:
 
 	}
 
-	double rebuildSolution(int size){
-		double alpha = 1.0;
-		int totalJobs = size;
+	double recreateSolution(int pos, double alpha){
+		// cout << "recreateSolution" << endl;
+		// cin.get();
+		bool teste = true;
+		
+		// this->print();
+		// this->printAlloc();
+		// cout << "initial alloc size: " << this->alloc.size() << endl;
+
+		for(int i = this->alloc.size() - 1; i >= pos; i--){
+			teste = this->alloc[i]->vms->popJob(this->alloc[i]->job->id);
+			if(!teste){
+				cout << "NAO CONSEGUIU POP JOB!" << endl;
+				cin.get();
+			}
+			delete this->alloc[i];
+			this->alloc.pop_back();
+		}
+		// cout << "middle alloc size: " << this->alloc.size() << endl;
+		int totalJobs = jobs.size() - pos;
 		while(totalJobs > 0){
-			// cout << "************************** TOTAL JOBS: " << totalJobs << endl;
-			// cin.get();
 			vector<Job*> CL;
 			vector<int> jobVmDestination;
 			vector<int> outputVmDestination;
-			vector<double> cost;
 			for(unsigned int i = 0; i < jobs.size(); i++){
 				// cout << "i: " << i  << " JobName: "<< jobs[i]->name << endl;
 				if (jobs[i]->alocated)
@@ -659,33 +666,13 @@ public:
 							// cin.get();
 							break;
 						}
-						double insertionCost = calculateMakespam();
-						// cout << "JOB: " << jobs[i]->id << " vmsID: " << vms[m]->id << " InsertionID: " << vms[d]->id <<  " COST: " << insertionCost << endl;
-						// cin.get();
-						if(CL.size() == 0){
-							CL.push_back(jobs[i]);
-							jobVmDestination.push_back(m);
-							cost.push_back(insertionCost);
-							outputVmDestination.push_back(d);
-						} else{
-							bool inserted = false;
-							for(unsigned int j = 0; j < cost.size(); j++){
-								if(cost[j] >= insertionCost){
-									cost.insert(cost.begin() + j, insertionCost);
-									jobVmDestination.insert(jobVmDestination.begin() + j, m);
-									CL.insert(CL.begin() + j, jobs[i]);
-									outputVmDestination.insert(outputVmDestination.begin() + j, d);
-									inserted = true;
-									break;
-								}
-							}
-							if (!inserted){
-								cost.push_back(insertionCost);
-								jobVmDestination.push_back(m);
-								CL.push_back(jobs[i]);
-								outputVmDestination.push_back(d);
-							}
-						}
+						// if(jobs[i]->name == "ID00002"){
+						// 	cout << "JOB: " << jobs[i]->id << " vmsID: " << vms[m]->name << " InsertionID: " << vms[d]->id <<  " COST: " << insertionCost << endl;
+						// 	cin.get();
+						// }
+						CL.push_back(jobs[i]);
+						jobVmDestination.push_back(m);
+						outputVmDestination.push_back(d);
 						// cout << "tested!" << endl;
 						vms[m]->popJob(jobs[i]->id);
 						// cout << "Spam After Removal: " << vms[m]->calculateLocalspam() << endl;
@@ -694,57 +681,28 @@ public:
 				}
 			}
 
-			// cout << "CL size: " << CL.size() << endl;
-			// for(unsigned int c = 0; c < CL.size(); c++){
-			// 	cout << CL[c]->id << " " ;
-			// }
-			// cout << endl;
-			if(CL.size() == 0){
-				cout << "NO POSSIBLE MOVEMENTS!" << endl;
-				cin.get();
-			}
 			int chosenMovement;
 			int maxClPos = (int)(CL.size() * alpha);
 			if(maxClPos == 0)
 				chosenMovement = 0;
 			else
 				chosenMovement = random() % maxClPos;
-
-			// cout << "Chosen Movement: " << chosenMovement << endl;
-			// cout << "CLSIZE: " << CL.size() << endl;
 			bool moveDone = doMovement(jobVmDestination[chosenMovement], outputVmDestination[chosenMovement], CL[chosenMovement]);
 			if(moveDone){
 				// cout << "JobID: " << CL[chosenMovement]->id << " Was Inserted!" << endl;
 				totalJobs--;
 			}
-			else
-				// cout << "JobID: " << CL[chosenMovement]->id << " Was NOT Inserted!" << endl;
-			
-			// cout << "Spam: " << calculateMakespam() << endl;
-			cin.get();
-
+			else{
+				cout << "JobID: " << CL[chosenMovement]->id << " Was NOT Inserted!" << endl;
+				cin.get();
+			}
 		}
-		// cout << "Testing solution..." << endl;
-		// cout << "[";
-		// for(unsigned int i = 0; i < jobs.size();i++){
-		// 	cout << jobs[i]->alocated_vm_id << ",";
-		// }
-		// cout << "]" << endl;
-		// cout << "[";
-		// for(unsigned int i = 0; i < jobs.size();i++){
-		// 	cout << jobs[i]->alocated << ",";
-		// }
-		// cout << "]" << endl;
+		// cout << "final alloc size: " << this->alloc.size() << endl;
+		// this->print();
+		// this->printAlloc();
 		// cin.get();
-		// vector<int> vmUsage(vms.size());
-		// for(unsigned int f = 0; f < files.size(); f++){
-		// 	vmUsage[files[f]->alocated_vm_id] += files[f]->size;
-		// }
-		// for(unsigned int vm = 0; vm < vms.size(); vm++){
-		// 	cout << "vmName: " << vms[vm]->name << " vmTotalSize: " << vms[vm]->storage << " usage: " << vmUsage[vm] << endl; 
-		// }
-		// cin.get();
-		return calculateMakespam();
+		return this->calculateMakespam();
+
 	}
 
 	double createSolution(double alpha){

@@ -3,6 +3,7 @@
 #include "../include/MinMin.h"
 #include "../include/Problem.h"
 #include "../include/Grasp.h"
+#include "../include/MILS.h"
 
 typedef vector<Chromosome> vect_chrom_type;
 
@@ -568,7 +569,7 @@ int main(int argc, char **argv) {
     srandom(setting->seed);
     Problem * emptyProblem = new Problem(name_workflow, name_cluster);
     // cout << "Alpha: " << setting->alpha << endl;
-    Grasp * g = new Grasp(emptyProblem, setting->alpha);
+    Mils * g = new Mils(emptyProblem, setting->alpha);
     Problem * bestSol = g->start();
     clock_t end = clock();
     double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
