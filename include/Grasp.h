@@ -33,6 +33,7 @@ class Grasp{
             Problem * bestSolution = new Problem(*p);
             bestSolution->createSolution(this->alpha);
             for(int iter = 0; iter < 100; iter++){
+                // cout << "iter= " << iter << endl;
                 p = new Problem(*this->blankProblem);
                 p->createSolution(this->alpha);
                 // p->printAlloc();
@@ -47,6 +48,7 @@ class Grasp{
                 }
                 bool improvement = true;
                 while(improvement){
+                    // cout << "LOOP START" << endl;
                     improvement = false;
                     bool lsImprovement = false;
                     for(int i = 0; i < p->alloc.size(); i++){ // RELOCATE LOOP START
@@ -85,7 +87,12 @@ class Grasp{
                         }
                     } // RELOCATE LOOP END
 
-                    if(lsImprovement) improvement = true;
+                    if(lsImprovement){
+                        // cout << "MELHOROU COM A BL1" << endl;
+                        // cin.get();
+                        improvement = true;
+                        continue;
+                    } 
                     lsImprovement = false;
                     // cout << "EXAUSTED RELOCATE! p->cost was: " << p->calculateMakespam() << endl;
                     for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
@@ -106,7 +113,12 @@ class Grasp{
                         }
                     } // END SWAP MACHINE LOOP
 
-                    if(lsImprovement) improvement = true;
+                    if(lsImprovement){
+                        // cout << "MELHOROU COM A BL2" << endl;
+                        // cin.get();
+                        improvement = true;
+                        continue;
+                    }
                     lsImprovement = false;
                     // cout << "EXAUSTED SWAP MACHINE! p->cost was: " << p->calculateMakespam() << endl;
                     // for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START

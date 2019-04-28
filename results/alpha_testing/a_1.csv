@@ -1,0 +1,15 @@
+instance,best,average,cv,time
+./input/Workflows/CyberShake_30.xml.dag,17.4667,17.4767,0.00063126,0.0328125
+./input/Workflows/CyberShake_50.xml.dag,22.2167,22.2517,0.000986162,0.103125
+./input/Workflows/CyberShake_100.xml.dag,33.0833,33.6767,0.00978352,0.55625
+./input/Workflows/GENOME.d.351024866.0.dax.dag,478.017,495.393,0.0198573,0.364063
+./input/Workflows/GENOME.d.702049732.0.dax.dag,878.633,898.595,0.0133323,1.3125
+./input/Workflows/Epigenomics_24.xml.dag,60.4833,62.6383,0.0626012,0.025
+./input/Workflows/Epigenomics_46.xml.dag,111.867,113.725,0.0140291,0.103125
+./input/Workflows/Epigenomics_100.xml.dag,946.3,954.303,0.00613473,0.870313
+./input/Workflows/Montage_25.xml.dag,1.2,1.25667,1.47336,0.025
+./input/Workflows/Montage_50.xml.dag,2.43333,2.57833,0.229029,0.173437
+./input/Workflows/Montage_100.xml.dag,5.15,5.43333,0.0439983,1.07656
+./input/Workflows/Inspiral_30.xml.dag,15.95,16.8767,0.0227446,0.04375
+./input/Workflows/Inspiral_50.xml.dag,27.8833,28.44,0.0149259,0.14375
+./input/Workflows/Inspiral_100.xml.dag,47.3833,48.6433,0.0124567,0.607812
