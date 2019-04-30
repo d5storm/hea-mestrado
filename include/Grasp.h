@@ -121,22 +121,28 @@ class Grasp{
                     }
                     lsImprovement = false;
                     // cout << "EXAUSTED SWAP MACHINE! p->cost was: " << p->calculateMakespam() << endl;
-                    // for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
-                    //     for (int j = 0; j < p->alloc.size(); j++){
-                    //         Problem * backup = new Problem(*p);
-                    //         improvement = p->swapMachinePair(i, j);
-                    //         if(improvement){
-                    //             // cout << "SWAP PAIR IMPROV! Cost: " << p->calculateMakespam() << endl;
-                    //             // cin.get();
-                    //             delete backup;
-                    //             break;
-                    //         } else{
-                    //             delete p;
-                    //             p = backup;
-                    //         }
-                    //     }
-                    // } // END SWAP MACHINE LOOP
+                    for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
+                        for (int j = 0; j < p->alloc.size(); j++){
+                            Problem * backup = new Problem(*p);
+                            lsImprovement = p->swapMachineWrite(i);
+                            if(lsImprovement){
+                                delete backup;
+                                break;
+                            } else{
+                                delete p;
+                                p = backup;
+                            }
+                        }
+                    } // END SWAP MACHINE LOOP
                     // cout << "EXAUSTED SWAP PAIR!" << endl;
+                    if(lsImprovement){
+                        // cout << "MELHOROU COM A BL3" << endl;
+                        // cin.get();
+                        improvement = true;
+                        continue;
+                    }
+                    lsImprovement = false;
+
                     if (p->calculateMakespam() < bestSolValue){
                         delete bestSolution;
                         bestSolution = new Problem(*p);
@@ -149,6 +155,7 @@ class Grasp{
             }
             // exit(1);
             // cin.get();
+            bestSolution->checkFeasible();
             return bestSolution;
         }
 };
