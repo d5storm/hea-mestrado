@@ -32,6 +32,9 @@ class Grasp{
             double bestSolValue = 9999999999.0;
             Problem * bestSolution = new Problem(*p);
             bestSolution->createSolution(this->alpha);
+            int localSearchActivated1 = 0;
+            int localSearchActivated2 = 0;
+            int localSearchActivated3 = 0;
             for(int iter = 0; iter < 100; iter++){
                 // cout << "iter= " << iter << endl;
                 p = new Problem(*this->blankProblem);
@@ -89,6 +92,7 @@ class Grasp{
 
                     if(lsImprovement){
                         // cout << "MELHOROU COM A BL1" << endl;
+                        localSearchActivated1++;
                         // cin.get();
                         improvement = true;
                         continue;
@@ -115,6 +119,7 @@ class Grasp{
 
                     if(lsImprovement){
                         // cout << "MELHOROU COM A BL2" << endl;
+                        localSearchActivated2++;
                         // cin.get();
                         improvement = true;
                         continue;
@@ -139,6 +144,7 @@ class Grasp{
                         // cout << "MELHOROU COM A BL3" << endl;
                         // cin.get();
                         improvement = true;
+                        localSearchActivated3++;
                         continue;
                     }
                     lsImprovement = false;
@@ -156,6 +162,7 @@ class Grasp{
             // exit(1);
             // cin.get();
             bestSolution->checkFeasible();
+            cout << bestSolution->calculateMakespam() << " " << localSearchActivated1 << " " << localSearchActivated2 << " " << localSearchActivated3 << " " << localSearchActivated1 + localSearchActivated2 + localSearchActivated3 << " ";
             return bestSolution;
         }
 };

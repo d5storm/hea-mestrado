@@ -19,8 +19,8 @@ execpath="./bin/HEA"
 clusters="./input/clusters/cluster.vcl"
 workflows="./input/Workflows/"
 dag=".dag"
-# declare -a wkf=("CyberShake_30.xml" "CyberShake_50.xml" "CyberShake_100.xml" "GENOME.d.351024866.0.dax" "GENOME.d.702049732.0.dax" "Epigenomics_24.xml" "Epigenomics_46.xml" "Epigenomics_100.xml" "Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
-declare -a wkf=("Epigenomics_24.xml" "Epigenomics_46.xml" "Epigenomics_100.xml" "Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
+declare -a wkf=("CyberShake_30.xml" "CyberShake_50.xml" "CyberShake_100.xml" "GENOME.d.351024866.0.dax" "GENOME.d.702049732.0.dax" "Epigenomics_24.xml" "Epigenomics_46.xml" "Epigenomics_100.xml" "Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
+# declare -a wkf=("Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
 # declare -a wkf=("GENOME.d.702049732.0.dax")
 # declare -a wkf=("Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
 trap CTRLC SIGINT
@@ -30,10 +30,10 @@ for (( a = 2; a <= 2; a++))
 do
 	for file in "${wkf[@]}"
 	do
-		for ((  i = 1 ;  i <= 10;  i++  )) 
+		for ((  i = 1 ;  i <= 1;  i++  )) 
 		do	
-			echo  -ne $file '\n' & EXEC $execpath -a $a -s $i -c $clusters -w $workflows$file$dag >> ./results/relocate_testing/"relocate_swapmachine_swapwrite_first_improve.txt"
+			echo  -ne $file '\n' & EXEC $execpath -a $a -s $i -c $clusters -w $workflows$file$dag >> ./results/local_search_testing/"GRASP_local_search_usage.txt"
 		done			
 	done
-	echo "Creating .csv ...\n" & EXEC ./results/script ./results/relocate_testing/"relocate_swapmachine_swapwrite_first_improve.txt" ./results/relocate_testing/"relocate_swapmachine_swapwrite_first_improve.csv" 10
+	# echo "Creating .csv ...\n" & EXEC ./results/script ./results/relocate_testing/"GRASP-ILS.txt" ./results/relocate_testing/"GRASP-ILS.csv" 10
 done

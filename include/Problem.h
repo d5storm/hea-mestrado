@@ -409,14 +409,27 @@ public:
 		Allocation * swap = this->alloc[pos];
 		Machine * originalAllocationMachine = swap->vms;
 		double originalCost = this->calculateMakespam();
+
+		if(!this->checkFeasible()){
+			cout << "At first it was not feasible" << endl;
+			cin.get();
+		}
+
 		for(unsigned int i = 0; i < this->vms.size(); i++){
-			swap->vms = this->vms[i];
+			
 			for(int j = this->alloc.size() - 1; j >= pos; j--)
 				this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
+
+			swap->vms = this->vms[i];
 
 			for(unsigned int j = pos; j < this->alloc.size(); j++){
 				double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
 				this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
+			}
+
+			if(!this->checkFeasible()){
+				cout << "machine swap was not feasible" << endl;
+				cin.get();
 			}
 
 			if(this->calculateMakespam() < originalCost){
@@ -430,6 +443,12 @@ public:
 			double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
 			this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
 		}
+
+		if(!this->checkFeasible()){
+			cout << "undo of move was not feasible" << endl;
+			cin.get();
+		}
+
 		return false;
 	}
 
@@ -818,6 +837,59 @@ public:
 		// }
 		// cin.get();
 		return calculateMakespam();
+	}
+
+	bool perturbateWriteTo(int pos){
+		int newVM = rand() % vms.size();
+
+
+
+		for(int i = this->alloc.size() - 1; i >= pos; i--){
+			bool teste = this->alloc[i]->vms->popJob(this->alloc[i]->job->id);
+			if(!teste){
+				cout << "nao pop job!" << endl;
+				cin.get();
+			}
+		}
+
+		alloc[pos]->writeTo = vms[newVM]->id;
+
+
+		for(int i = pos; i < this->alloc.size(); i++){
+			bool teste = alloc[i]->vms->pushJob(alloc[i]->job, alloc[i]->writeTo, getJobConflictMinSpam(alloc[i]->job));
+			if(!teste){
+				cout << "nao push job!" << endl;
+				cin.get();
+			}
+		}
+
+		return true;
+	}
+
+	bool perturbateMachine(int pos){
+		int newVM = rand() % vms.size();
+
+
+
+		for(int i = this->alloc.size() - 1; i >= pos; i--){
+			bool teste = this->alloc[i]->vms->popJob(this->alloc[i]->job->id);
+			if(!teste){
+				cout << "nao pop job!" << endl;
+				cin.get();
+			}
+		}
+
+		alloc[pos]->vms = vms[newVM];
+
+		for(int i = pos; i < this->alloc.size(); i++){
+			bool teste = alloc[i]->vms->pushJob(alloc[i]->job, alloc[i]->writeTo, getJobConflictMinSpam(alloc[i]->job));
+			if(!teste){
+				cout << "nao push job!" << endl;
+				cin.get();
+			}
+		}
+
+		return true;
 	}
 
 	bool doMovement(int vm, int output, Job* job){

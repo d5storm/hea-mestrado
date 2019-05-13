@@ -569,13 +569,14 @@ int main(int argc, char **argv) {
     srandom(setting->seed);
     Problem * emptyProblem = new Problem(name_workflow, name_cluster);
     // cout << "Alpha: " << setting->alpha << endl;
-    // Mils * g = new Mils(emptyProblem, setting->alpha);
+    // Mils * g = new Mils(emptyProblem, setting->alpha, 0.1);
+    cout << name_workflow << " ";
     Grasp * g = new Grasp(emptyProblem, setting->alpha);
     Problem * bestSol = g->start();
     clock_t end = clock();
     double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
     double bestSolValue = bestSol->calculateMakespam();
-    cout << name_workflow << " "<< bestSolValue / 60.0 << " " << elapseSecs << endl;
+    cout << elapseSecs << endl;
     // exit(1);
     // bestSol->printAlloc();
     // bestSol->print();
