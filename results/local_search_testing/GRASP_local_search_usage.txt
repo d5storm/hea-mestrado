@@ -1,2 +1,14 @@
-./input/Workflows/CyberShake_30.xml.dag 617 588 540 8 1136 13.0781
-CTRL C ---------------------------------- PRESSIONADO!!!
+./input/Workflows/CyberShake_30.xml.dag 10.2833 588 540 8 1136 13.0312
+./input/Workflows/CyberShake_50.xml.dag 12.2167 1665 881 11 2557 154.375
+./input/Workflows/CyberShake_100.xml.dag 13.8167 4934 1758 10 6702 4032.55
+./input/Workflows/GENOME.d.351024866.0.dax.dag 386.75 3966 1039 0 5005 959.094
+./input/Workflows/GENOME.d.702049732.0.dax.dag 739 5801 910 0 6711 6879.44
+./input/Workflows/Epigenomics_24.xml.dag 48.1167 926 629 0 1555 5.625
+./input/Workflows/Epigenomics_46.xml.dag 93.25 2004 610 0 2614 86.5469
+./input/Workflows/Epigenomics_100.xml.dag 792.167 2705 425 0 3130 1599.8
+./input/Workflows/Montage_25.xml.dag 1.13333 782 411 0 1193 5.98438
+./input/Workflows/Montage_50.xml.dag 2.36667 1654 635 0 2289 134.266
+./input/Workflows/Montage_100.xml.dag 4.8 2672 1150 0 3822 2727.58
+./input/Workflows/Inspiral_30.xml.dag 13.9833 979 290 1 1270 8.07812
+./input/Workflows/Inspiral_50.xml.dag 23.4 1288 369 2 1659 71.0312
+./input/Workflows/Inspiral_100.xml.dag 42.5667 1751 378 0 2129 936.156

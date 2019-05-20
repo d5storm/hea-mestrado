@@ -162,7 +162,7 @@ class Grasp{
             // exit(1);
             // cin.get();
             bestSolution->checkFeasible();
-            cout << bestSolution->calculateMakespam() << " " << localSearchActivated1 << " " << localSearchActivated2 << " " << localSearchActivated3 << " " << localSearchActivated1 + localSearchActivated2 + localSearchActivated3 << " ";
+            // cout << bestSolution->calculateMakespam() / 60 << " " << localSearchActivated1 << " " << localSearchActivated2 << " " << localSearchActivated3 << " " << localSearchActivated1 + localSearchActivated2 + localSearchActivated3 << " ";
             return bestSolution;
         }
 };
