@@ -157,15 +157,26 @@ class Mils{
             return p;
         }
 
-        Problem * start(){
+        Problem * start(clock_t begin, double max_time){
+            // cout << "Begin: " << begin << " max_time: " << max_time << endl;
             Problem * p = new Problem(*this->blankProblem);           
             double bestSolValue = 9999999999.0;
             Problem * bestSolution = new Problem(*this->blankProblem);
             string bestSolOrigin = "";
             int machine = 0;
             int write = 0;
+            int grasp_best = -1;
+            int ils_best = -1;
             // bestSolution->createSolution(this->alpha);
-            for(int iter = 0; iter < 10; iter++){
+            bool run = true;
+            int iter = -1;
+            while(run){
+                iter++;
+            // for(int iter = 0; iter < 10; iter++){
+                if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time){ 
+                    cout << grasp_best << " " << ils_best << " ";
+                    return bestSolution;
+                }
                 // if(iter % 10 == 0){
                 //     cout << "Iter: " << iter << endl;
                 // }
@@ -188,6 +199,10 @@ class Mils{
                 // cin.get();
                 double lastPvalue = p->calculateMakespam();
                 for(int mov = 0; mov < 10; mov++){
+                    if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time) { 
+                        cout << grasp_best << " " << ils_best << " ";
+                        return bestSolution;
+                    }
                     // if(mov % 10 == 0){
                     //     cout << "Mov: " << mov << endl;
                     // }
@@ -199,6 +214,8 @@ class Mils{
                         delete backupP;
                         backupP = new Problem(*p);
                         if (p->calculateMakespam() < bestSolValue){
+                            grasp_best = iter;
+                            ils_best = mov;
                             // cout << "BestSol value after localsearch: " << p->calculateMakespam() << endl;
                             delete bestSolution;
                             bestSolution = new Problem(*p);
@@ -222,6 +239,7 @@ class Mils{
             }
             // exit(1);
             // cin.get();
+            cout << grasp_best << " " << ils_best << " ";
             return bestSolution;
         }
 };

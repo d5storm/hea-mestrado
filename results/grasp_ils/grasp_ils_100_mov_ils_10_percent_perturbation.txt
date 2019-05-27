@@ -1,0 +1,12 @@
+./input/Workflows/CyberShake_30.xml.dag 4 38 10.2333 67.75
+./input/Workflows/CyberShake_30.xml.dag 5 95 10.2333 75.3594
+./input/Workflows/CyberShake_30.xml.dag 2 72 10.25 69.2188
+./input/Workflows/CyberShake_30.xml.dag 2 47 10.2167 68.2344
+./input/Workflows/CyberShake_30.xml.dag 9 48 10.25 69.3594
+./input/Workflows/CyberShake_50.xml.dag 6 81 12.55 764.25
+./input/Workflows/CyberShake_50.xml.dag 0 55 11.8667 762.203
+./input/Workflows/CyberShake_50.xml.dag 1 71 11.85 771.078
+./input/Workflows/CyberShake_50.xml.dag 0 65 11.9333 739.406
+./input/Workflows/CyberShake_50.xml.dag 0 63 11.8833 713.875
+./input/Workflows/CyberShake_100.xml.dag 3 94 13.95 18151.9
+./input/Workflows/CyberShake_100.xml.dag 6 86 13.5833 16193.2
