@@ -1031,174 +1031,8 @@ public:
 
 	double Simulate(){
 
-		// createSolution(0.3);
-
-		vector<string> order = {"ID00013", "ID00002", "ID00026", "ID00014", "ID00009", "ID00018", "ID00024", "ID00016", "ID00005", "ID00028", 
-		"ID00011", "ID00022", "ID00023", "ID00012", "ID00025", "ID00015", "ID00020", "ID00027", "ID00029", "ID00006", "ID00019", "ID00010", 
-		"ID00017", "ID00003", "ID00007", "ID00008", "ID00004", "ID00021", "ID00000", "ID00001"};
-
-		vector<int> vm_order = {0, 0, 0, 2};
-
-
-		Job * job;
-		Machine * aux;
-		double minSpam;
-
-		job = this->getJobByName("ID00013");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("ID00002");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("ID00016");
-		aux = vms[3];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("ID00014");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("ID00018");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("ID00024");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("ID00028");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-		job = this->getJobByName("");
-		aux = vms[0];
-		minSpam = getJobConflictMinSpam(job);
-		aux->pushJob(job, -1, minSpam);
-
-
-		double makespam = calculateMakespam();
-		cout << "My Makespam: " << makespam << endl;
-		this->print();
-		return makespam;
+		
+		return 0.0;
 		// cin.get();
 	}
 
@@ -1220,8 +1054,49 @@ public:
 		return NULL;
 	}
 
+	Problem(string file){
+		ifstream in_file(file);
+		string line;
 
-	Problem(string workflow, string cluster){
+		getline(in_file, line);
+		vector<string> tokens;
+		boost::split(tokens, line, boost::is_any_of(" "));
+
+		int jobs = stoi(tokens[0]);
+		int files = stoi(tokens[1]);
+		int vms = stoi(tokens[2]);
+
+		vector<string> job_lines;
+
+		for(int j = 0; j < jobs; j++){
+			getline(in_file, line);
+			job_lines.push_back(line);
+		}
+
+		for(int f = 0; f < files; f++){
+			getline(in_file, line);
+			boost::split(tokens, line, boost::is_any_of(" "));
+			string file_name = tokens[0];
+			double file_size = stod(tokens[1]);
+			int is_static = stoi(tokens[2]);
+			Item * newItem;
+			if(is_static == 1){
+				int n_static_vms = stoi(tokens[3]);
+				vector<int> static_vms;
+				for(int s = 0; s < n_static_vms; s++){
+					static_vms.push_back(stoi(tokens[4+s]));
+				}
+				newItem = new Item(file_name, f, file_size, static_vms);
+			} else{
+				newItem = new Item(file_name, f, file_size);
+			}
+
+			this->files.push_back(newItem);
+		}
+
+	}
+
+	Problem(string workflow){
 
 		//Reading workflow file
 		ifstream in_file(workflow);

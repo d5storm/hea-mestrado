@@ -531,8 +531,6 @@ void setupCmd(int argc, char **argv, string &name_workflow, string &name_cluster
         // Define a value argument and add it to the command line.
         ValueArg<string> arg1("w", "workflow", "Name of workflow file", true, "file", "string");
         cmd.add(arg1);
-        ValueArg<string> arg2("c", "cluster", "Name of virtual cluster file", true, "file", "string");
-        cmd.add(arg2);
         ValueArg<string> arg3("s", "seed", "Value of seed", true, "file", "string");
         cmd.add(arg3);
         ValueArg<string> arg4("a", "alpha", "Value of alpha", true, "file", "string");
@@ -546,7 +544,6 @@ void setupCmd(int argc, char **argv, string &name_workflow, string &name_cluster
 
         // Get the value parsed by each arg.
         name_workflow = arg1.getValue();
-        name_cluster = arg2.getValue();
 
         setting->seed = stoi(arg3.getValue());
         setting->alpha = stoi(arg4.getValue()) / 10.0;
@@ -570,55 +567,7 @@ int main(int argc, char **argv) {
     setupCmd(argc, argv, name_workflow, name_cluster);
 
     srandom(setting->seed);
-    string names[14] = {"./input/Workflows/CyberShake_30.xml.dag", "./input/Workflows/CyberShake_50.xml.dag", "./input/Workflows/CyberShake_100.xml.dag", "./input/Workflows/GENOME.d.351024866.0.dax.dag", "./input/Workflows/GENOME.d.702049732.0.dax.dag", "./input/Workflows/Epigenomics_24.xml.dag", "./input/Workflows/Epigenomics_46.xml.dag", "./input/Workflows/Epigenomics_100.xml.dag", "./input/Workflows/Montage_25.xml.dag", "./input/Workflows/Montage_50.xml.dag", "./input/Workflows/Montage_100.xml.dag", "./input/Workflows/Inspiral_30.xml.dag", "./input/Workflows/Inspiral_50.xml.dag", "./input/Workflows/Inspiral_100.xml.dag"};
-    double times[14] = { 73.15, 211.86, 1007.57, 1415.53, 2174.04, 2196.79, 2269.40, 2641.61, 2664.94, 2745.30, 3342.10, 3382.33, 3490.26, 4015.34 };
-    Problem * emptyProblem = new Problem(name_workflow, name_cluster);
-    // cout << "Alpha: " << setting->alpha << endl;
-    // cout << name_workflow << " ";
-    Mils * g = new Mils(emptyProblem, setting->alpha, setting->mutation_probability);
-    // Grasp * g = new Grasp(emptyProblem, setting->alpha);
-    double max_time;
-    for(int i = 0; i < 14; i++){
-        // cout << "names[i]: " << names[i] << " name_workflow: " << name_workflow << endl;
-        if(names[i] == name_workflow){
-            // cout << "Entrou!" << endl;
-            max_time = times[i];
-        }
-    }
-    // cout << "MAX TIME: " << max_time << endl;
-    // cin.get();
-    Problem * bestSol = g->start(begin, max_time);
-    clock_t end = clock();
-    double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
-    double bestSolValue = bestSol->calculateMakespam();
-    cout << bestSolValue / 60.0 << " " << elapseSecs << endl;
-    // exit(1);
-    // bestSol->printAlloc();
-    // bestSol->print();
-    // cout << "********************" << endl;
-    // cin.get();
-    // begin = clock();
-    // auto best = run(name_workflow, name_cluster);
-
-    // best.computeFitness(true, true);
-    // end = clock();
-    // elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
-    // cout << "Him: " << best.fitness / 60.0 << " " << elapseSecs << endl;
-    // best.print();
-    // exit(1);
-
-    // end = clock();
-
-    // // double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
-
-    // if (setting->verbose){
-    //     cout << "\t **** HEA **** " << endl;
-    //     best.print();
-    // }
-
-    
-    // cout << best.fitness / 60.0 << " " << elapseSecs / 60.0 << endl;
-        
+    Problem * emptyProblem = new Problem(name_workflow);
 
 
     //delete setting struct
