@@ -567,6 +567,7 @@ int main(int argc, char **argv) {
     setupCmd(argc, argv, name_workflow, name_cluster);
 
     srandom(setting->seed);
+    
     Problem * emptyProblem = new Problem(name_workflow);
 
 

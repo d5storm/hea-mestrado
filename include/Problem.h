@@ -31,9 +31,12 @@ class Job{
 public:
 	string name;
 	int id;
-	double base_time;
+	double base_time_cpu;
+	double base_time_gpu;
 	bool rootJob;
 	bool alocated = false;
+	bool gpu = false;
+	bool on_gpu = false;
 	int alocated_vm_id = -1;
 	vector<Item*> input, output;
 
@@ -81,15 +84,14 @@ public:
 	}
 
 	Job(){};
-	Job (string name, int id, double base_time, bool rootJob, vector<Item*> input, vector<Item*> output):
-		name(name), id(id), base_time(base_time), rootJob(rootJob), input(input), output(output){}
 };
 
 class Machine{
 public:
 	string name;
 	int id;
-	double slowdown, storage, cost, bandwidth;
+	double cpu_slowdown, gpu_slowdown, storage, cost;
+	vector<double> bandwidth;
 	vector<Job*> timelineJobs;
 	vector<double> timelineStartTime;
 	vector<double> timelineFinishTime;
@@ -199,7 +201,12 @@ public:
 				writetime += job->output[i]->IOTimeCost[minBandwidthVm];
 			}
 		}
-		double processtime = ceil(job->base_time * this->slowdown);
+		double processtime;
+		if(job->on_gpu)
+			processtime = ceil(job->base_time_gpu * this->gpu_slowdown);
+		else
+			processtime = ceil(job->base_time_cpu * this->cpu_slowdown);
+		// double processtime = ceil(job->base_time * this->slowdown);
 		double finishTime = readtime + writetime + processtime + startTime;
 
 		// if(job->name == "ID00002"){
@@ -254,8 +261,6 @@ public:
 
 
 	Machine(){}
-	Machine (string name, int id, double slowdown, double storage, double cost, double bandwidth):
-		name(name), id(id), slowdown(slowdown), storage(storage), cost(cost), bandwidth(bandwidth){}
 };
 
 class Allocation{
@@ -583,7 +588,8 @@ public:
 			Job * newJob = new Job();
 			newJob->name = copiedJob->name;
 			newJob->id = copiedJob->id;
-			newJob->base_time = copiedJob->base_time;
+			newJob->base_time_cpu = copiedJob->base_time_cpu;
+			newJob->base_time_gpu = copiedJob->base_time_gpu;
 			newJob->rootJob = copiedJob->rootJob;
 			newJob->alocated = copiedJob->alocated;
 			newJob->alocated_vm_id = copiedJob->alocated_vm_id;
@@ -611,7 +617,8 @@ public:
 			Machine * newMachine = new Machine();
 			newMachine->name = copiedMachine->name;
 			newMachine->id = copiedMachine->id;
-			newMachine->slowdown = copiedMachine->slowdown;
+			newMachine->gpu_slowdown = copiedMachine->gpu_slowdown;
+			newMachine->cpu_slowdown = copiedMachine->cpu_slowdown;
 			newMachine->storage = copiedMachine->storage;
 			newMachine->cost = copiedMachine->cost;
 			newMachine->bandwidth = copiedMachine->bandwidth;
@@ -930,22 +937,6 @@ public:
 	}
 
 	bool checkFeasible(){
-		// for(unsigned int i = 0; i < files.size(); i++){  // checando se os arquivos static estao alocados nas máquinas possíveis.
-		// 	if(files[i]->is_static){
-		// 		bool feasible_alocation = false;
-		// 		for(unsigned int m = 0; m < files[i]->static_vms.size(); m++){
-		// 			if(files[i]->alocated_vm_id == files[i]->static_vms[m]){
-		// 				feasible_alocation = true;
-		// 				break;
-		// 			}
-		// 		}
-		// 		if(!feasible_alocation){
-		// 			cout << "Arquivo: " << files[i]->name << " nao alocado numa static_vms!" << endl;
-		// 			return false;
-		// 		}
-		// 	}
-		// }
-
 		for(unsigned int i = 0; i < files.size(); i++){  // checando se todos os arquivos estao alocados a alguma maquina
 			if(files[i]->alocated_vm_id < 0){
 				cout << "Arquivo: " << i << " nao alocado!" << endl;
@@ -1021,7 +1012,7 @@ public:
 		// 		continue;
 		// 	}
 		// 	int machineID = jobs[i]->alocated_vm_id;
-		// 	Machine * vm = vms[machineID];
+		// 	Machine * vm = vms[machineID]; 
 		// 	double spam = vm->calculateLocalspam();
 		// 	if(spam > minSpam)
 		// 		minSpam = spam;
@@ -1038,8 +1029,8 @@ public:
 
 	Item * getFileByName(string name){
 		for(unsigned int i = 0; i < this->files.size(); i++){
-			// cout << "FileName: |" << this->files[i]->name << "|" << name << "|" << endl;
-			// if(this->files[i]->name == name) cout << "EQUAL" << endl;
+			cout << "FileName: |" << this->files[i]->name << "|" << name << "|" << endl;
+			if(this->files[i]->name == name) cout << "EQUAL" << endl;
 			if(this->files[i]->name == name)
 				return this->files[i];
 		}
@@ -1055,6 +1046,8 @@ public:
 	}
 
 	Problem(string file){
+		// cout << "Starting to read instance..." << endl;
+
 		ifstream in_file(file);
 		string line;
 
@@ -1066,19 +1059,25 @@ public:
 		int files = stoi(tokens[1]);
 		int vms = stoi(tokens[2]);
 
+		// cout << "Jobs: " << jobs << " files: " << files << " vms: " << vms << endl;
+
 		vector<string> job_lines;
 
 		for(int j = 0; j < jobs; j++){
 			getline(in_file, line);
 			job_lines.push_back(line);
+			// cout << "ReadLine: " << line << endl;
 		}
 
+		cin.get();
 		for(int f = 0; f < files; f++){
 			getline(in_file, line);
+			// cout << "ReadLine: " << line << endl;
 			boost::split(tokens, line, boost::is_any_of(" "));
 			string file_name = tokens[0];
 			double file_size = stod(tokens[1]);
 			int is_static = stoi(tokens[2]);
+			// cout << "file_name: " << file_name << " file_size: " << file_size << " is_static: " << is_static << endl;
 			Item * newItem;
 			if(is_static == 1){
 				int n_static_vms = stoi(tokens[3]);
@@ -1094,225 +1093,100 @@ public:
 			this->files.push_back(newItem);
 		}
 
-	}
+		// cout << "Finished reading files.." << endl;
 
-	Problem(string workflow){
+		for(int j = 0; j < jobs; j++){
+			line = job_lines[j];
+			// cout << "Stored line: " << line << endl;
+			boost::split(tokens, line, boost::is_any_of(" "));
+			string job_name = tokens[0];
+			double cpu_time = stod(tokens[1]);
+			double gpu_time = stod(tokens[2]);
+			int n_input = stoi(tokens[3]);
+			// cout << "n_input: " << n_input << endl;
+			vector<Item*> input, output;
+			for(int i = 0; i < n_input; i++){
+				// cout << "Reading pos: " << 4+i << endl;
+				string id = tokens[4+i];
+				Item * item = this->getFileByName(id);
+				input.push_back(item);
+			}
+			int n_output = stoi(tokens[4+n_input]);
+			// cout << "n_output: " << n_output << endl;
+			for(int i = 0; i < n_output; i++){
+				string id = tokens[4+n_input+1+i];
+				// cout << "READ ID: " << id << endl;
+				Item * item = this->getFileByName(id);
+				// cout << "Recovered item id: " << item->id << endl;
+				// cin.get();
+				output.push_back(item);
+			}
+			// cout << "ALOW" << endl;
+			Job* newJob = new Job();
+			newJob->name = job_name;
+			newJob->id = j;
+			newJob->base_time_cpu = cpu_time;
+			newJob->base_time_gpu = gpu_time;
+			newJob->input = input;
+			newJob->output = output;
+			if(gpu_time > 0){
+				newJob->gpu = true;
+			}
+			this->jobs.push_back(newJob);
+		}
 
-		//Reading workflow file
-		ifstream in_file(workflow);
-		string line;
+		// cout << "Finished reading jobs.." << endl;
 
-		// Get number of jobs and number of items
+		vector<vector<string>> machines;
 		getline(in_file, line);
-		vector<string> tokens;
+		// cout << "ReadLine: " << line << endl;
 		boost::split(tokens, line, boost::is_any_of(" "));
+		machines.push_back(tokens);
+		getline(in_file, line);
+		boost::split(tokens, line, boost::is_any_of(" "));
+		machines.push_back(tokens);
+		getline(in_file, line);
+		boost::split(tokens, line, boost::is_any_of(" "));
+		machines.push_back(tokens);
 
-		int sfile_size = stoi(tokens[0]);
-		int dfile_size = stoi(tokens[1]);
-		int job_size = stoi(tokens[2]);
+		// cout << "Finished reading Vms.." << endl;
 
-		for(unsigned int i = 0; i < job_size; i++){
-			vector<int> aux1(job_size);
-			conflicts.push_back(aux1);
-			vector<int> aux2(job_size);
-			notParallelable.push_back(aux2);
-		}
-
-		int total_file = sfile_size + dfile_size;
-		
-		getline(in_file, line); //reading blank line
-
-		//Reading items
-		for(unsigned int i = 0; i < total_file; i++){
-			getline(in_file, line);
-			vector<string> strs;
-			boost::split(strs, line, boost::is_any_of(" "));
-			string file_name = strs[0];
-			double file_size = stod(strs[1]);
-			
-			Item * afile;
-			if(i < sfile_size){
-				int n_static_vms = stoi(strs[2]);
-				// cout << "n_static: " << n_static_vms << endl;
-				vector<int> static_vms;
-				for(unsigned int j = 3; j < 3 + n_static_vms; j++){
-					static_vms.push_back(stoi(strs[j]));
-					// cout << strs[j] << endl;
-				}
-				afile = new Item(file_name, i, file_size, static_vms);
-			} else{
-				afile = new Item(file_name, i, file_size);
-				
-			}
-			this->files.push_back(afile);
-		}
-		// cout << this->files.size() << endl;
-		// for(unsigned int i = 0; i < this->files.size();i++){
-		// 	cout << this->files[i]->name << endl;
-		// }
-		getline(in_file, line); //reading blank line
-		// cout << "!!!" << endl;
-
-		for(unsigned int i = 0; i < job_size; i++){
-			getline(in_file, line);
-			vector<string> strs;
-			boost::split(strs, line, boost::is_any_of(" "));
-			// get job info
-			string job_name = strs[0];
-			auto job_time = stod(strs[2]);
-			auto n_input_files = stoi(strs[3]);
-			auto n_output_files = stoi(strs[4]);
-			vector<Item*> input;
-			vector<Item*> output;
-			//reading input files
-			bool is_root_job = true;
-			int total_not_roots = 0;
-			// cout << "!!!" << endl;
-			for(unsigned int j = 0; j < n_input_files; j++){
-				getline(in_file, line);
-				Item * inputItem = getFileByName(line);
-				// cout << line << endl;
-				// cout << "name: " << inputItem->name << endl;
-				if(!inputItem->is_static) total_not_roots++;
-				input.push_back(inputItem);
-			}
-			if(total_not_roots == n_input_files)
-				is_root_job = false;
-			//reading output files
-			for(unsigned int j = 0; j < n_output_files; j++){
-				getline(in_file, line);
-				Item * outputItem = getFileByName(line);
-				output.push_back(outputItem);
-			}
-
-			Job * ajob = new Job(job_name, i, job_time, is_root_job, input, output);
-			this->jobs.push_back(ajob);
-		}
-		// cout << "!!!" << endl;
-		getline(in_file, line); //reading blank line
-
-		// for(unsigned int i = 0; i < jobs.size(); i++){
-		// 	cout << "NAME: " << jobs[i]->name << " ISROOT:" << jobs[i]->rootJob << " BASETIME: " << jobs[i]->base_time << " [";
-		// 	for(unsigned int j = 0; j < jobs[i]->input.size(); j++){
-		// 		cout << jobs[i]->input[j]->name << ", ";
-		// 	}
-		// 	cout << "] [";
-		// 	for(unsigned int j = 0; j < jobs[i]->output.size(); j++){
-		// 		cout << jobs[i]->output[j]->name << ", ";
-		// 	}
-		// 	cout << "]" << endl;
-		// }
-		// cin.get();
-
-		// reading topology
-		for(unsigned int i = 0; i < job_size; i++){
-			getline(in_file, line);
-			vector<string> strs;
-			boost::split(strs, line, boost::is_any_of(" "));
-
-			string job_name = strs[0];
-			Job * aux = getJobByName(job_name);
-			int father_id = aux->id;
-			int children = stoi(strs[1]);
-			for(unsigned int j = 0; j < children; j++){
-				getline(in_file, line);
-				vector<string> strs;
-				boost::split(strs, line, boost::is_any_of(" "));
-				string name = strs[0];
-				aux = getJobByName(name);
-				int id = aux->id;
-				conflicts[id][father_id] = 1;
-			}
-		}
-
-		// setting if jobs are parallelable
-
-		for(unsigned int i = 0; i < job_size-1; i++){
-			for(unsigned int j = i+1; j < job_size; j++){
-				Job * job1 = jobs[i];
-				Job * job2 = jobs[j];
-				for(unsigned int k = 0; k < total_file; k++){
-					if(job1->checkInputNeed(files[k]->id) && job2->checkInputNeed(files[k]->id)){
-						notParallelable[job1->id][job2->id] = 1;
-						notParallelable[job2->id][job1->id] = 1;
-					}
-				}
-			}
-		}
-
-		// for(unsigned int i = 0; i < job_size; i++){
-		// 	for(unsigned int j = 0; j < job_size; j++){
-		// 		cout << notParallelable[i][j] << " ";
+		// for(int y = 0; y < machines.size(); y++){
+		// 	for(int z = 0; z < machines[y].size(); z++){
+		// 		cout << machines[y][z] << " ";
 		// 	}
 		// 	cout << endl;
 		// }
+
 		// cin.get();
-		in_file.close();
-
-		ifstream in_cfile(cluster);
-
-
-
-		// Reading Cluster's info
-		getline(in_cfile, line);//ignore first line
-		getline(in_cfile, line);
-
-		vector<string> strs1;
-		boost::split(strs1, line, boost::is_any_of(" "));
-
-		int vm_size = stoi(strs1[4]);
-
-		//reading vms
-		for(unsigned int i = 0; i < vm_size; i++){
-			getline(in_cfile, line);
-			vector<string> strs;
-			boost::split(strs, line, boost::is_any_of(" "));
-
-
-			int type_id = stoi(strs[0]);
-			string vm_name = strs[1];
-			double slowdown = stod(strs[2]);
-			double storage = stod(strs[3]) * 1024; // GB to MB
-			double bandwidth = stod(strs[4]);
-			double cost = stod(strs[5]);
-
-			Machine * avm = new Machine(vm_name, type_id, slowdown, storage, cost, bandwidth);
-			this->vms.push_back(avm);
+		for(int m = 0; m < vms; m++){
+			Machine * newVM = new Machine();
+			newVM->name = "";
+			newVM->id = m;
+			newVM->cpu_slowdown = stod(machines[0][m]);
+			newVM->gpu_slowdown = stod(machines[1][m]);
+			newVM->storage = stod(machines[2][m]);
+			this->vms.push_back(newVM);
 		}
 
-		// for(unsigned int i = 0; i < this->vms.size(); i++){
-		// 	cout << "NAME: " << this->vms[i]->name << endl;
-		// }
-		// cin.get();
+		vector<vector<string>> transfer;
+		getline(in_file, line);
+		boost::split(tokens, line, boost::is_any_of(" "));
+		transfer.push_back(tokens);
+		getline(in_file, line);
+		boost::split(tokens, line, boost::is_any_of(" "));
+		transfer.push_back(tokens);
+		getline(in_file, line);
+		boost::split(tokens, line, boost::is_any_of(" "));
+		transfer.push_back(tokens);
 
-		in_cfile.close();
-
-		// pre-calculating READ/WRITE times for files
-
-		for(unsigned int i = 0; i < this->files.size(); i++){
-			this->files[i]->IOTimeCost = vector<double>(this->vms.size());
-			for(unsigned int j = 0; j < this->vms.size(); j++){
-				double IO = ceil(this->files[i]->size / this->vms[j]->bandwidth);
-				int vm_id = this->vms[j]->id;
-				this->files[i]->IOTimeCost[vm_id] = IO;
-			}	
+		for(int t = 0; t < vms; t++){
+			for(int t2 = 0; t2 < vms; t2++){
+				this->vms[t]->bandwidth.push_back(stod(transfer[t][t2]));
+			}
 		}
 
-		for(unsigned int i = 0; i < this->files.size(); i++){
-			this->files[i]->VMsBandwidth = vector<double>(this->vms.size());
-			for(unsigned int j = 0; j < this->vms.size(); j++){
-				this->files[i]->VMsBandwidth[j] = this->vms[j]->bandwidth;
-			}	
-		}
-
-		// for(unsigned int i = 0; i < this->files.size(); i++){
-		// 	for(unsigned int j = 0; j < this->vms.size(); j++){
-		// 		cout << this->files[i].IOTimeCost[j] << " ";
-		// 	}
-		// 	cout << endl;
-		// }
-		// cin.get();
-
+		cout << "Finished Reading!" << endl;
 	}
 
 	~Problem() { 
