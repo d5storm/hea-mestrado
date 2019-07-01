@@ -90,12 +90,13 @@ class Machine{
 public:
 	string name;
 	int id;
-	double cpu_slowdown, gpu_slowdown, storage, cost;
-	vector<double> bandwidth;
+	double cpu_slowdown, gpu_slowdown, storage, gpu_cost, cpu_cost;
+	vector<vector<double>> bandwidth;
 	vector<Job*> timelineJobs;
 	vector<double> timelineStartTime;
 	vector<double> timelineFinishTime;
 	double makespam = 0.0;
+	double cost = 0.0;
 
 	double calculateLocalspam(){
 		if(timelineFinishTime.size() == 0){
@@ -106,10 +107,24 @@ public:
 		return this->makespam; 
 	}
 
+	double calculateCost(){
+		this->cost = 0.0;
+		for(int i = 0; i < timelineJobs.size(); i++){
+			if(timelineJobs[i]->on_gpu) {
+				this->cost += (timelineJobs[i]->base_time_gpu * this->gpu_slowdown) * gpu_cost;
+			}
+			else {
+				this->cost += (timelineJobs[i]->base_time_cpu * this->cpu_slowdown) * cpu_cost;
+			}
+		}
+		return this->cost;
+	}
+
 	bool popJob(int jobId){
 		for(unsigned int i = 0; i < timelineJobs.size(); i++){
 			if (timelineJobs[i]->id == jobId){
 				timelineJobs[i]->alocated = false;
+				timelineJobs[i]->on_gpu = false;
 				for(unsigned int f = 0; f < timelineJobs[i]->output.size(); f++){
 					timelineJobs[i]->output[f]->alocated_vm_id = -1;
 				}
@@ -128,7 +143,11 @@ public:
 		return false;
 	}
 
-	bool pushJob(Job * job, int write_vm_id, double minSpam){
+	bool pushJob(Job * job, int write_vm_id, double minSpam, bool GPU){
+		if(write_vm_id < 0){
+			cout << "123123123123" << endl;
+			cin.get();
+		}
 		// if(!job->checkJobFeasibleOnMachine(this->id)){
 		// 	cout << "not feasible on machine" << endl;
 		// 	return false;
@@ -136,6 +155,7 @@ public:
 		// cout << "feasible on machine" << endl;
 		// cout << "MinSpam: " << minSpam << endl;
 		// cout << "JobID: " << job->id << endl;
+		// cin.get();
 		for(unsigned int i = 0; i < job->input.size(); i++){ // checando se todos os arquivos de input que nao sao estaticos ja foram produzidos
 			// cout << "inputFileID: " << job->input[i]->id << " isStatic: " << job->input[i]->is_static << endl;
 			if(job->input[i]->is_static == false && job->input[i]->alocated_vm_id < 0){
@@ -163,8 +183,7 @@ public:
 		for(unsigned int i = 0; i < job->input.size(); i++){
 			if(job->input[i]->alocated_vm_id == this->id)
 				continue;
-			int minBandwidthVm = this->id;
-
+			int source;
 			if(job->input[i]->is_static){
 				bool transferNeed = true;
 				double maxBandwidth = 0.0;
@@ -179,40 +198,52 @@ public:
 					}
 				}
 
-				if(job->input[i]->VMsBandwidth[id] < job->input[i]->VMsBandwidth[this->id])
-					minBandwidthVm = id;
-				if(transferNeed) readtime += job->input[i]->IOTimeCost[minBandwidthVm];
+				source = id;
+				double readTime;
+				if(this->bandwidth[id][this->id] == 0.0){
+					readTime = 0.0;
+				} else
+					readTime = ceil(job->input[i]->size / this->bandwidth[id][this->id]);
+				if(transferNeed) readtime += readTime;
 			} else{
-				if(job->input[i]->VMsBandwidth[job->input[i]->alocated_vm_id] < job->input[i]->VMsBandwidth[this->id])
-					minBandwidthVm = job->input[i]->alocated_vm_id;
-				readtime += job->input[i]->IOTimeCost[minBandwidthVm];			
+				double readTime;
+				if(this->bandwidth[job->input[i]->alocated_vm_id][this->id] == 0.0){
+					readTime = 0.0;
+				} else
+					readTime = ceil(job->input[i]->size / this->bandwidth[job->input[i]->alocated_vm_id][this->id]);
+				readtime += readTime;	
 			}
 		}
 
 		// cout << "ReadTime: " << readtime << endl;
+		// cout << "test " << this->id << " " << write_vm_id << endl;
+		// cout << this->bandwidth[this->id][write_vm_id] << endl;
+		// cout << "test2" << endl;
 		// cin.get();
 
 		double writetime = 0.0;
 		if(write_vm_id != -1 && write_vm_id != this->id){
 			for(unsigned int i = 0; i < job->output.size(); i++){
-				int minBandwidthVm = this->id;
-				if(job->output[i]->VMsBandwidth[write_vm_id] < job->output[i]->VMsBandwidth[this->id])
-					minBandwidthVm = job->output[i]->alocated_vm_id;
-				writetime += job->output[i]->IOTimeCost[minBandwidthVm];
+				// cout << "size: " << job->input[i]->size << endl;
+				writetime += ceil(job->output[i]->size / this->bandwidth[this->id][write_vm_id]);
 			}
 		}
+
+		// cout << "12" << endl;
 		double processtime;
-		if(job->on_gpu)
+		if(GPU){
+			job->on_gpu = true;
 			processtime = ceil(job->base_time_gpu * this->gpu_slowdown);
+		}
 		else
 			processtime = ceil(job->base_time_cpu * this->cpu_slowdown);
 		// double processtime = ceil(job->base_time * this->slowdown);
 		double finishTime = readtime + writetime + processtime + startTime;
 
 		// if(job->name == "ID00002"){
-		// 	cout << "ProcessMachineID: " <<this->id << " ProcessMAchineName: " << this->name << " writeID: " << write_vm_id << " minSpam: " << minSpam << endl;
-		// 	cout << "start: " << startTime << " read: " << readtime << " process: " << processtime << " write: " << writetime << " fulltime: " << finishTime << endl;
-		// 	cin.get();
+			// cout << "ProcessMachineID: " <<this->id << " ProcessMAchineName: " << this->name << " writeID: " << write_vm_id << " minSpam: " << minSpam << endl;
+			// cout << "start: " << startTime << " read: " << readtime << " process: " << processtime << " write: " << writetime << " fulltime: " << finishTime << endl;
+			// cin.get();
 		// }
 
 		timelineStartTime.push_back(startTime);
@@ -222,9 +253,12 @@ public:
 		job->alocated = true;
 		job->alocated_vm_id = this->id;
 		for(unsigned int i = 0; i < job->output.size(); i++){
+			if(job->output[i]->is_static) continue;
 			int final_vm = this->id;
 			if(write_vm_id != -1)
 				final_vm = write_vm_id;
+			// cout << "FinalWriteVM: " << final_vm << endl;
+			if(final_vm < 0) {cin.get();}
 			job->output[i]->alocated_vm_id = final_vm;
 		}
 
@@ -267,6 +301,7 @@ class Allocation{
 public:
 	Job * job;
 	Machine * vms;
+	bool GPU;
 	int writeTo;
 };
 
@@ -279,280 +314,8 @@ public:
 	vector<Job*> jobs;
 	vector<Machine*> vms;
 	vector<Allocation*> alloc;
-
-	bool changeAllocVm(int pos, int vm_id){
-		// cout << "!!!" << endl;
-
-		Job* job = alloc[pos]->job;
-		for(int i = 0; i < job->input.size(); i++){
-			if(job->input[i]->is_static){
-				bool found = false;
-				for(int j = 0; j < job->input[i]->static_vms.size(); j++){
-					if(job->input[i]->static_vms[j] == vm_id){
-						found = true;
-						break;
-					}
-				}
-				if(!found)
-					return false;
-			}
-
-		}
-
-		for(int i = alloc.size() - 1; i >= pos; i--){
-			alloc[i]->vms->popJob(alloc[i]->job->id);
-		}
-		// this->print();
-		// cin.get();
-		alloc[pos]->vms = this->vms[vm_id];
-		for(unsigned int i = pos; i < alloc.size(); i++){
-			double minSpam = getJobConflictMinSpam(alloc[i]->job);
-			// cout << "MinSpam: " << minSpam << endl;
-			// cin.get();
-			alloc[i]->vms->pushJob(alloc[i]->job, alloc[i]->writeTo, minSpam);
-		}
-		return true;
-	}
-
-	
-
-	bool changeAllocOrder(int pos1, int pos2){
-		Job * job1 = alloc[pos1]->job;
-		Job * job2 = alloc[pos2]->job;
-		for(unsigned int i = pos1; i < pos2; i++){
-			if(conflicts[job2->id][alloc[i]->job->id] == 1)
-				return false;
-		}
-		
-		
-
-		for(int i = (alloc.size() - 1); i >= pos1; i--){
-			alloc[i]->vms->popJob(alloc[i]->job->id);
-		}
-
-		this->print();
-
-		Allocation * aux = alloc[pos1];
-		alloc[pos1] = alloc[pos2];
-		alloc[pos2] = aux;
-
-		for(unsigned int i = pos1; i < alloc.size(); i++){
-			double minSpam = getJobConflictMinSpam(alloc[i]->job);
-			alloc[i]->vms->pushJob(alloc[i]->job, alloc[i]->writeTo, minSpam);
-		}
-		return true;
-	}
-
-	bool forceRelocate(int pos){
-		vector<int> possibleMoves;
-		Allocation * relocation = this->alloc[pos];
-		// this->printAlloc();
-		// cout << "********" << endl;
-		this->alloc.erase(this->alloc.begin() + pos);
-		for(int i = 0; i < this->alloc.size(); i++){
-			if(i == pos) continue;
-			bool tryMove = true;
-			if(pos > i){
-				for(unsigned int j = i; j < this->alloc.size(); j++){ // vendo se topologia é respeitada para a direita
-					if(this->conflicts[relocation->job->id][this->alloc[j]->job->id] == 1){
-						tryMove = false;
-						break;
-					}
-				}
-			} else{
-				for(unsigned int j = 0; j < i; j++){ // vendo se topologia é respeitada para a esquerda
-					if(this->conflicts[this->alloc[j]->job->id][relocation->job->id] == 1){
-						tryMove = false;
-						break;
-					}
-				}
-			}
-
-			if(!tryMove){ // topologia nao foi respeitada, nao tente movimento
-				// cout << "quebra topologia" << endl;
-				continue;
-			}
-			possibleMoves.push_back(i);
-			
-			
-		}
-		if(possibleMoves.empty()){
-			this->alloc.insert(this->alloc.begin() + pos, relocation);
-			return false;
-		}
-		int posRand = random() % possibleMoves.size();
-		int insertionPos = possibleMoves.at(posRand);
-		if(possibleMoves.size() > 1){
-			while(insertionPos == pos){
-				posRand = random() % possibleMoves.size();
-				insertionPos = possibleMoves.at(posRand);
-			}
-		}
-
-			
-		this->alloc.insert(this->alloc.begin() + insertionPos, relocation);
-		
-		// this->printAlloc();
-		// cin.get();
-		// cout << "PosRemove: " << pos << " PosInsert: " << insertionPos << endl;
-
-		for(int j = this->alloc.size() - 1; j >= pos; j--)
-			this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
-
-
-		for(unsigned int j = pos; j < this->alloc.size(); j++){
-			double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
-			this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
-		}
-
-		// this->printAlloc();
-
-		return true;
-	}
-
-	bool swapMachine(int pos){
-		Allocation * swap = this->alloc[pos];
-		Machine * originalAllocationMachine = swap->vms;
-		double originalCost = this->calculateMakespam();
-
-		if(!this->checkFeasible()){
-			cout << "At first it was not feasible" << endl;
-			cin.get();
-		}
-
-		for(unsigned int i = 0; i < this->vms.size(); i++){
-			
-			for(int j = this->alloc.size() - 1; j >= pos; j--)
-				this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
-
-			swap->vms = this->vms[i];
-
-			for(unsigned int j = pos; j < this->alloc.size(); j++){
-				double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
-				this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
-			}
-
-			if(!this->checkFeasible()){
-				cout << "machine swap was not feasible" << endl;
-				cin.get();
-			}
-
-			if(this->calculateMakespam() < originalCost){
-				return true;
-			}
-		}
-		swap->vms = originalAllocationMachine;
-		for(int j = this->alloc.size() - 1; j >= pos; j--)
-				this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
-		for(unsigned int j = pos; j < this->alloc.size(); j++){
-			double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
-			this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
-		}
-
-		if(!this->checkFeasible()){
-			cout << "undo of move was not feasible" << endl;
-			cin.get();
-		}
-
-		return false;
-	}
-
-	bool swapMachineWrite(int pos){
-		Allocation * swap = this->alloc[pos];
-		int originalAllocationMachine = swap->writeTo;
-		double originalCost = this->calculateMakespam();
-		for(unsigned int i = 0; i < this->vms.size(); i++){
-			swap->writeTo = this->vms[i]->id;
-			for(int j = this->alloc.size() - 1; j >= pos; j--)
-				this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
-
-			for(unsigned int j = pos; j < this->alloc.size(); j++){
-				double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
-				this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
-			}
-
-			if(this->calculateMakespam() < originalCost){
-				return true;
-			}
-		}
-		swap->writeTo = originalAllocationMachine;
-		for(int j = this->alloc.size() - 1; j >= pos; j--)
-				this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
-		for(unsigned int j = pos; j < this->alloc.size(); j++){
-			double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
-			this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
-		}
-		return false;
-	}
-
-	bool realocate(int pos1, int pos2){
-		Allocation * relocation = this->alloc[pos1];
-		// this->printAlloc();
-		// cout << "********" << endl;
-		this->alloc.erase(this->alloc.begin() + pos1);
-
-		bool tryMove = true;
-		if(pos1 > pos2){
-			for(unsigned int j = pos2; j < this->alloc.size(); j++){ // vendo se topologia é respeitada para a direita
-				if(this->conflicts[relocation->job->id][this->alloc[j]->job->id] == 1){
-					tryMove = false;
-					break;
-				}
-			}
-		} else{
-			for(unsigned int j = 0; j < pos2; j++){ // vendo se topologia é respeitada para a esquerda
-				if(this->conflicts[this->alloc[j]->job->id][relocation->job->id] == 1){
-					tryMove = false;
-					break;
-				}
-			}
-		}
-
-		if(!tryMove){ // topologia nao foi respeitada, nao tente movimento
-			// cout << "quebra topologia" << endl;
-			this->alloc.insert(this->alloc.begin() + pos1, relocation);
-			return false;
-		}
-
-			
-		this->alloc.insert(this->alloc.begin() + pos2, relocation);
-		
-		// this->printAlloc();
-		// cin.get();
-		// cout << "PosRemove: " << pos << " PosInsert: " << insertionPos << endl;
-		bool teste = true;
-		for(int j = this->alloc.size() - 1; j >= pos1; j--){
-			teste = this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
-			if(!teste){
-				cout << "NAO CONSEGUIU POP!" << endl;
-				cin.get();
-			}
-		}
-
-		for(unsigned int j = pos1; j < this->alloc.size(); j++){
-			double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
-			this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
-		}
-
-		// this->printAlloc();
-
-		return true;
-	}
-
-	void changeAllocWrite(int pos, int newWriteTo){
-		for(int i = alloc.size() - 1; i >= pos; i--){
-			alloc[i]->vms->popJob(alloc[i]->job->id);
-		}
-		// this->print();
-		// cin.get();
-		alloc[pos]->writeTo = newWriteTo;
-		for(unsigned int i = pos; i < alloc.size(); i++){
-			double minSpam = getJobConflictMinSpam(alloc[i]->job);
-			// cout << "MinSpam: " << minSpam << endl;
-			// cin.get();
-			alloc[i]->vms->pushJob(alloc[i]->job, alloc[i]->writeTo, minSpam);
-		}
-	}
+	double maxTime, maxCost;
+	double ponderation = 0.5;
 
 	void printAlloc(){
 		// cout << "Allocation order that created solution: " << endl;
@@ -620,7 +383,8 @@ public:
 			newMachine->gpu_slowdown = copiedMachine->gpu_slowdown;
 			newMachine->cpu_slowdown = copiedMachine->cpu_slowdown;
 			newMachine->storage = copiedMachine->storage;
-			newMachine->cost = copiedMachine->cost;
+			newMachine->cpu_cost = copiedMachine->cpu_cost;
+			newMachine->gpu_cost = copiedMachine->gpu_cost;
 			newMachine->bandwidth = copiedMachine->bandwidth;
 			newMachine->timelineStartTime = copiedMachine->timelineStartTime;
 			newMachine->timelineFinishTime = copiedMachine->timelineFinishTime;
@@ -644,149 +408,93 @@ public:
 			newAllocation->job = this->jobs[copiedJobId];
 			int copiedVmsId = copiedAllocation->vms->id;
 			newAllocation->vms = this->vms[copiedVmsId];
+			newAllocation->GPU = copiedAllocation->GPU;
 			this->alloc.push_back(newAllocation);
 		}
 
 	}
 
-	double recreateSolution(int pos, double alpha){
-		// cout << "recreateSolution" << endl;
-		// cin.get();
-		bool teste = true;
-		
-		// this->print();
-		// this->printAlloc();
-		// cout << "initial alloc size: " << this->alloc.size() << endl;
-
-		for(int i = this->alloc.size() - 1; i >= pos; i--){
-			teste = this->alloc[i]->vms->popJob(this->alloc[i]->job->id);
-			if(!teste){
-				cout << "NAO CONSEGUIU POP JOB!" << endl;
-				cin.get();
-			}
-			delete this->alloc[i];
-			this->alloc.pop_back();
-		}
-		// cout << "middle alloc size: " << this->alloc.size() << endl;
-		int totalJobs = jobs.size() - pos;
-		while(totalJobs > 0){
-			vector<Job*> CL;
-			vector<int> jobVmDestination;
-			vector<int> outputVmDestination;
-			for(unsigned int i = 0; i < jobs.size(); i++){
-				// cout << "i: " << i  << " JobName: "<< jobs[i]->name << endl;
-				if (jobs[i]->alocated)
-					continue;
-				for(unsigned int m = 0; m < vms.size(); m++){
-					for(unsigned int d = 0; d < vms.size(); d++){
-
-						double minSpam = getJobConflictMinSpam(jobs[i]);
-						if(minSpam < 0) break; 
-						bool pushed = vms[m]->pushJob(jobs[i], d, minSpam);
-						// cin.get();
-						if(!pushed){
-							// cout << "COULD NOT PUSH!" << endl;
-							// cin.get();
-							break;
-						}
-						// if(jobs[i]->name == "ID00002"){
-						// 	cout << "JOB: " << jobs[i]->id << " vmsID: " << vms[m]->name << " InsertionID: " << vms[d]->id <<  " COST: " << insertionCost << endl;
-						// 	cin.get();
-						// }
-						CL.push_back(jobs[i]);
-						jobVmDestination.push_back(m);
-						outputVmDestination.push_back(d);
-						// cout << "tested!" << endl;
-						vms[m]->popJob(jobs[i]->id);
-						// cout << "Spam After Removal: " << vms[m]->calculateLocalspam() << endl;
-						// cin.get();
-					}
-				}
-			}
-
-			int chosenMovement;
-			int maxClPos = (int)(CL.size() * alpha);
-			if(maxClPos == 0)
-				chosenMovement = 0;
-			else
-				chosenMovement = random() % maxClPos;
-			bool moveDone = doMovement(jobVmDestination[chosenMovement], outputVmDestination[chosenMovement], CL[chosenMovement]);
-			if(moveDone){
-				// cout << "JobID: " << CL[chosenMovement]->id << " Was Inserted!" << endl;
-				totalJobs--;
-			}
-			else{
-				cout << "JobID: " << CL[chosenMovement]->id << " Was NOT Inserted!" << endl;
-				cin.get();
-			}
-		}
-		// cout << "final alloc size: " << this->alloc.size() << endl;
-		// this->print();
-		// this->printAlloc();
-		// cin.get();
-		return this->calculateMakespam();
-
-	}
-
 	double createSolution(double alpha){
+		// cout << "Create Solution..." << endl;
 		int totalJobs = jobs.size();
 		while(totalJobs > 0){
-			// cout << "************************** TOTAL JOBS: " << totalJobs << endl;
-			// cin.get();
+			// cout << "TotalJobs: " << totalJobs << endl;
 			vector<Job*> CL;
 			vector<int> jobVmDestination;
 			vector<int> outputVmDestination;
+			vector<bool> onGpu;
 			vector<double> cost;
+			// cout << "JobsSize: " << jobs.size() << endl;
+			// cout << "VMSSize: " << vms.size() << endl;
+			// cin.get();
 			for(unsigned int i = 0; i < jobs.size(); i++){
-				// cout << "i: " << i  << " JobName: "<< jobs[i]->name << endl;
 				if (jobs[i]->alocated)
 					continue;
+				// cout << "CL for JOBID: " << jobs[i]->id << endl;
 				for(unsigned int m = 0; m < vms.size(); m++){
+					// cout << "M: " << m << endl;
 					for(unsigned int d = 0; d < vms.size(); d++){
-
-						double minSpam = getJobConflictMinSpam(jobs[i]);
-						if(minSpam < 0) break; 
-						bool pushed = vms[m]->pushJob(jobs[i], d, minSpam);
-						// cin.get();
-						if(!pushed){
-							// cout << "COULD NOT PUSH!" << endl;
+						// cout << "D: " << d << endl;
+						for(unsigned int gpu = 0; gpu < 2; gpu++){
+							// cout << "ALOW" << endl;
+							bool useGpu = false;
+							if(gpu == 0 ){ // Use GPU
+								useGpu = true;
+							}
+							if(useGpu && !jobs[i]->gpu)	continue;			
+							// cout << "Getting min spam" << endl;
+							double minSpam = getJobConflictMinSpam(jobs[i]);
+							// cout << "Got min spam" << endl;
+							// cout << "MinSpam: " << minSpam << endl;
+							if(minSpam < 0) break;
 							// cin.get();
-							break;
-						}
-						double insertionCost = calculateMakespam();
-						// if(jobs[i]->name == "ID00002"){
-						// 	cout << "JOB: " << jobs[i]->id << " vmsID: " << vms[m]->name << " InsertionID: " << vms[d]->id <<  " COST: " << insertionCost << endl;
-						// 	cin.get();
-						// }
-						if(CL.size() == 0){
-							CL.push_back(jobs[i]);
-							jobVmDestination.push_back(m);
-							cost.push_back(insertionCost);
-							outputVmDestination.push_back(d);
-						} else{
-							bool inserted = false;
-							for(unsigned int j = 0; j < cost.size(); j++){
-								if(cost[j] >= insertionCost){
-									cost.insert(cost.begin() + j, insertionCost);
-									jobVmDestination.insert(jobVmDestination.begin() + j, m);
-									CL.insert(CL.begin() + j, jobs[i]);
-									outputVmDestination.insert(outputVmDestination.begin() + j, d);
-									inserted = true;
-									break;
+							// cout << "vmssize: " << vms.size() << endl;
+							// cout << "Pushing job.." << endl;
+							bool pushed = vms[m]->pushJob(jobs[i], d, minSpam, useGpu);
+							// cout << "Pushed job.." << endl;
+							if(!pushed){
+								break;
+							}
+							// double insertionCost = calculateMakespam();
+							double insertionCost = calculateFO();
+
+							// cout << "JobID: " << jobs[i]->id << " Machine: " << m << " WriteTo: " << d << " GPU: " << useGpu << " cost: " << insertionCost << endl;
+							// cin.get();
+
+							if(CL.size() == 0){
+								CL.push_back(jobs[i]);
+								jobVmDestination.push_back(m);
+								cost.push_back(insertionCost);
+								outputVmDestination.push_back(d);
+								onGpu.push_back(useGpu);
+							} else{
+								bool inserted = false;
+								for(unsigned int j = 0; j < cost.size(); j++){
+									if(cost[j] >= insertionCost){
+										cost.insert(cost.begin() + j, insertionCost);
+										jobVmDestination.insert(jobVmDestination.begin() + j, m);
+										CL.insert(CL.begin() + j, jobs[i]);
+										outputVmDestination.insert(outputVmDestination.begin() + j, d);
+										onGpu.insert(onGpu.begin() + j, useGpu);
+										inserted = true;
+										break;
+									}
+								}
+								if (!inserted){
+									cost.push_back(insertionCost);
+									jobVmDestination.push_back(m);
+									CL.push_back(jobs[i]);
+									outputVmDestination.push_back(d);
+									onGpu.push_back(useGpu);
 								}
 							}
-							if (!inserted){
-								cost.push_back(insertionCost);
-								jobVmDestination.push_back(m);
-								CL.push_back(jobs[i]);
-								outputVmDestination.push_back(d);
-							}
+							// cout << "tested!" << endl;
+							vms[m]->popJob(jobs[i]->id);
+							// cout << "Spam After Removal: " << vms[m]->calculateLocalspam() << endl;
+							// cin.get();
 						}
-						// cout << "tested!" << endl;
-						vms[m]->popJob(jobs[i]->id);
-						// cout << "Spam After Removal: " << vms[m]->calculateLocalspam() << endl;
-						// cin.get();
 					}
+					// cin.get();
 				}
 			}
 
@@ -798,9 +506,11 @@ public:
 
 			// cout << "CL size: " << CL.size() << endl;
 			// for(unsigned int c = 0; c < CL.size(); c++){
-			// 	cout << CL[c]->id << " " ;
+			// 	cout << CL[c]->id << " GPU:" << onGpu[c] << " Destination: " <<jobVmDestination[c] << " OutPut: " << outputVmDestination[c] <<  " Cost: " << cost[c] << endl;
 			// }
 			// cout << endl;
+			// cin.get();
+
 
 			int chosenMovement;
 			int maxClPos = (int)(CL.size() * alpha);
@@ -810,17 +520,18 @@ public:
 				chosenMovement = random() % maxClPos;
 
 			// cout << "Chosen Movement: " << chosenMovement << endl;
+			// cin.get();
 			// cout << "CLSIZE: " << CL.size() << endl;
-			bool moveDone = doMovement(jobVmDestination[chosenMovement], outputVmDestination[chosenMovement], CL[chosenMovement]);
+			bool moveDone = doMovement(jobVmDestination[chosenMovement], outputVmDestination[chosenMovement], CL[chosenMovement], onGpu[chosenMovement]);
 			if(moveDone){
 				// cout << "JobID: " << CL[chosenMovement]->id << " Was Inserted!" << endl;
 				totalJobs--;
 			}
-			else
+			// else
 				// cout << "JobID: " << CL[chosenMovement]->id << " Was NOT Inserted!" << endl;
 			
 			// cout << "Spam: " << calculateMakespam() << endl;
-			cin.get();
+			// cin.get();
 
 		}
 		// cout << "Testing solution..." << endl;
@@ -843,69 +554,21 @@ public:
 		// 	cout << "vmName: " << vms[vm]->name << " vmTotalSize: " << vms[vm]->storage << " usage: " << vmUsage[vm] << endl; 
 		// }
 		// cin.get();
-		return calculateMakespam();
+		return calculateFO();
 	}
 
-	bool perturbateWriteTo(int pos){
-		int newVM = rand() % vms.size();
-
-
-
-		for(int i = this->alloc.size() - 1; i >= pos; i--){
-			bool teste = this->alloc[i]->vms->popJob(this->alloc[i]->job->id);
-			if(!teste){
-				cout << "nao pop job!" << endl;
-				cin.get();
-			}
-		}
-
-		alloc[pos]->writeTo = vms[newVM]->id;
-
-
-		for(int i = pos; i < this->alloc.size(); i++){
-			bool teste = alloc[i]->vms->pushJob(alloc[i]->job, alloc[i]->writeTo, getJobConflictMinSpam(alloc[i]->job));
-			if(!teste){
-				cout << "nao push job!" << endl;
-				cin.get();
-			}
-		}
-
-		return true;
-	}
-
-	bool perturbateMachine(int pos){
-		int newVM = rand() % vms.size();
-
-
-
-		for(int i = this->alloc.size() - 1; i >= pos; i--){
-			bool teste = this->alloc[i]->vms->popJob(this->alloc[i]->job->id);
-			if(!teste){
-				cout << "nao pop job!" << endl;
-				cin.get();
-			}
-		}
-
-		alloc[pos]->vms = vms[newVM];
-
-		for(int i = pos; i < this->alloc.size(); i++){
-			bool teste = alloc[i]->vms->pushJob(alloc[i]->job, alloc[i]->writeTo, getJobConflictMinSpam(alloc[i]->job));
-			if(!teste){
-				cout << "nao push job!" << endl;
-				cin.get();
-			}
-		}
-
-		return true;
-	}
-
-	bool doMovement(int vm, int output, Job* job){
+	bool doMovement(int vm, int output, Job* job, bool GPU){
 		Allocation * newAlloc = new Allocation();
 		newAlloc->job = job;
 		newAlloc->vms = vms[vm];
 		newAlloc->writeTo = output;
+		newAlloc->GPU = GPU;
 		alloc.push_back(newAlloc);
-		return vms[vm]->pushJob(job, output, getJobConflictMinSpam(job));
+		if(job->name == "t500"){
+			cout << "JOB CAGADO! OUTPUT: "<< output << endl;
+			cin.get();
+		}
+		return vms[vm]->pushJob(job, output, getJobConflictMinSpam(job), GPU);
 	}
 
 	void preSetStaticFile(Item * file, int vm_id){
@@ -917,7 +580,9 @@ public:
 		for(unsigned int i = 0; i < vms.size(); i++){
 			cout << "ID: " << vms[i]->id << " Name:" << vms[i]->name << ": " ;
 			for(unsigned int j = 0; j < vms[i]->timelineJobs.size(); j++){
-				cout << vms[i]->timelineJobs[j]->name << "( " << vms[i]->timelineStartTime[j] << "," << vms[i]->timelineFinishTime[j] << " )" << " ";
+				string gpu = "False";
+				if(vms[i]->timelineJobs[j]->on_gpu) gpu = "True";
+				cout << vms[i]->timelineJobs[j]->name  << " onGPU: " << gpu << " ( " << vms[i]->timelineStartTime[j] << "," << vms[i]->timelineFinishTime[j] << " )" << " ";
 			}
 			cout << endl;
 		}
@@ -931,27 +596,46 @@ public:
 		double makespam = 0.0;
 		for(unsigned int i = 0; i < vms.size(); i++){
 			double localspam = vms[i]->calculateLocalspam();
+			// cout << "VM: " << vms[i]->id << "Localspam: " << localspam << endl;
 			if (localspam > makespam) makespam = localspam;
 		}
 		return makespam;
 	}
 
+	double calculateFO(){
+		// cout << "Makespam: " << this->calculateMakespam() << endl;
+		// cout << "Cost: " << this->calculateCost() << endl;
+		// cout << "FO: " << this->ponderation*(this->calculateMakespam() / this->maxTime) + (1.0 - this->ponderation)*(this->calculateCost() / this->maxCost) << endl;
+		return this->ponderation*(this->calculateMakespam() / this->maxTime) + (1.0 - this->ponderation)*(this->calculateCost() / this->maxCost);
+	}
+
+	double calculateCost(){
+		double cost = 0.0;
+		for(unsigned int i = 0; i < vms.size(); i++){
+			cost += vms[i]->calculateCost();
+		}
+		return cost;
+	}
+
 	bool checkFeasible(){
+		bool feasible = true;
 		for(unsigned int i = 0; i < files.size(); i++){  // checando se todos os arquivos estao alocados a alguma maquina
 			if(files[i]->alocated_vm_id < 0){
-				cout << "Arquivo: " << i << " nao alocado!" << endl;
-				return false;
+				// cout << "ArquivoName: " << files[i]->name << " nao alocado!" << endl;
+				feasible = false;
 			}
 		}
+
+		// if(!feasible) return feasible;
 
 		for(unsigned int i = 0; i < jobs.size(); i++){ // checando se todos os jobs foram alocados
 			if(!jobs[i]->alocated){
 				cout << "Job: " << i << " nao alocado!" << endl;
-				return false;
+				feasible = false;
 			}
 			if(jobs[i]->alocated_vm_id < 0){
 				cout << "Job: " << i << " alocado, mas sem vm_id!" << endl;
-				return false;
+				feasible = false;
 			}
 
 			//checando se topologia foi respeitada
@@ -960,7 +644,7 @@ public:
 					continue;
 				if(jobs[j]->alocated == false){
 					cout << "Job: " << i << " nao teve topologia respeitada! Pre-Job: " << j << endl;
-					return false;
+					feasible =  false;
 				}
 
 				double preJobFinishtime = 0.0;
@@ -975,7 +659,7 @@ public:
 				// cout << "Job: " << i << " comecou no tempo: " << jobStartTime << ", mas preJob:" << j << " terminou no tempo: " << preJobFinishtime << endl;
 				if(jobStartTime < preJobFinishtime){
 					cout << "Job: " << i << " comecou no tempo: " << jobStartTime << ", mas preJob:" << j << " terminou no tempo: " << preJobFinishtime << endl;
-					return false;
+					feasible =  false;
 				}
 
 			}
@@ -983,12 +667,14 @@ public:
 		}	
 
 
-		return true;
+		return feasible;
 
 	}
 
 	double getJobConflictMinSpam(Job * job){
 		// cout << "JOBID: " << job->id << endl;
+		// cout << conflicts.size() << endl;
+		// cout << "123" << endl;
 		int id = job->id;
 		double minSpam = 0.0;
 		for(unsigned int i = 0; i < conflicts[id].size(); i++){ // checando tempo minimo baseado na topologia até o arquivo.
@@ -1029,8 +715,8 @@ public:
 
 	Item * getFileByName(string name){
 		for(unsigned int i = 0; i < this->files.size(); i++){
-			cout << "FileName: |" << this->files[i]->name << "|" << name << "|" << endl;
-			if(this->files[i]->name == name) cout << "EQUAL" << endl;
+			// cout << "FileName: |" << this->files[i]->name << "|" << name << "|" << endl;
+			// if(this->files[i]->name == name) cout << "EQUAL" << endl;
 			if(this->files[i]->name == name)
 				return this->files[i];
 		}
@@ -1069,7 +755,7 @@ public:
 			// cout << "ReadLine: " << line << endl;
 		}
 
-		cin.get();
+		// cin.get();
 		for(int f = 0; f < files; f++){
 			getline(in_file, line);
 			// cout << "ReadLine: " << line << endl;
@@ -1094,14 +780,17 @@ public:
 		}
 
 		// cout << "Finished reading files.." << endl;
-
+		double total_time_job_cpu = 0.0;
+		double total_time_job_gpu = 0.0;
 		for(int j = 0; j < jobs; j++){
 			line = job_lines[j];
 			// cout << "Stored line: " << line << endl;
 			boost::split(tokens, line, boost::is_any_of(" "));
 			string job_name = tokens[0];
 			double cpu_time = stod(tokens[1]);
+			total_time_job_cpu += cpu_time;
 			double gpu_time = stod(tokens[2]);
+			total_time_job_gpu += gpu_time;
 			int n_input = stoi(tokens[3]);
 			// cout << "n_input: " << n_input << endl;
 			vector<Item*> input, output;
@@ -1148,6 +837,12 @@ public:
 		getline(in_file, line);
 		boost::split(tokens, line, boost::is_any_of(" "));
 		machines.push_back(tokens);
+		getline(in_file, line);
+		boost::split(tokens, line, boost::is_any_of(" "));
+		machines.push_back(tokens);
+		getline(in_file, line);
+		boost::split(tokens, line, boost::is_any_of(" "));
+		machines.push_back(tokens);
 
 		// cout << "Finished reading Vms.." << endl;
 
@@ -1159,15 +854,41 @@ public:
 		// }
 
 		// cin.get();
+
+		double slowest_machine_cpu = 0.0;
+		double more_expensive_process_cpu = 0.0;
+		double slowest_machine_gpu = 0.0;
+		double more_expensive_process_gpu = 0.0;
+
 		for(int m = 0; m < vms; m++){
 			Machine * newVM = new Machine();
 			newVM->name = "";
 			newVM->id = m;
 			newVM->cpu_slowdown = stod(machines[0][m]);
+			if(newVM->cpu_slowdown > slowest_machine_cpu) slowest_machine_cpu = newVM->cpu_slowdown;
 			newVM->gpu_slowdown = stod(machines[1][m]);
+			if(newVM->gpu_slowdown > slowest_machine_gpu) slowest_machine_gpu = newVM->gpu_slowdown;
 			newVM->storage = stod(machines[2][m]);
+			newVM->cpu_cost = stod(machines[3][m]);
+			if(newVM->cpu_cost > more_expensive_process_cpu) more_expensive_process_cpu = newVM->cpu_cost;
+			newVM->gpu_cost = stod(machines[4][m]);
+			if(newVM->gpu_cost > more_expensive_process_gpu) more_expensive_process_gpu = newVM->gpu_cost;
 			this->vms.push_back(newVM);
 		}
+
+		this->maxTime = ceil(total_time_job_cpu * slowest_machine_cpu);
+		if(total_time_job_gpu * slowest_machine_gpu > this->maxTime) this->maxTime = total_time_job_gpu * slowest_machine_gpu;
+
+		this->maxCost = ceil(this->jobs.size() * more_expensive_process_cpu);
+		if(this->jobs.size() * more_expensive_process_gpu > this->maxCost) this->maxCost = this->jobs.size() * more_expensive_process_gpu;
+
+
+		// cout << "TotalTimeCpu: " << total_time_job_cpu << " TotalTimeGpu: " << total_time_job_gpu << endl;
+		// cout << "SlowMachineCpu: " << slowest_machine_cpu << " SlowMachineGpu: " << slowest_machine_gpu << endl;
+		// cout << "ExpensiveCpu: " << more_expensive_process_cpu << " ExpensiveGpu: " << more_expensive_process_gpu << endl;
+		// cout << "MaxTime: " << this->maxTime << " MaxCost: " << this->maxCost << endl;
+		// cin.get();
+
 
 		vector<vector<string>> transfer;
 		getline(in_file, line);
@@ -1180,13 +901,62 @@ public:
 		boost::split(tokens, line, boost::is_any_of(" "));
 		transfer.push_back(tokens);
 
-		for(int t = 0; t < vms; t++){
-			for(int t2 = 0; t2 < vms; t2++){
-				this->vms[t]->bandwidth.push_back(stod(transfer[t][t2]));
+		for(int i = 0; i < vms; i++){
+			for(int t = 0; t < vms; t++){
+				vector<double> double_line;
+				for(int t2 = 0; t2 < vms; t2++){
+					double_line.push_back(stod(transfer[t][t2]));
+					// cout << stod(transfer[t][t2]) << " " ;
+				}
+				// cout << endl;
+				this->vms[i]->bandwidth.push_back(double_line);
 			}
 		}
 
-		cout << "Finished Reading!" << endl;
+		// for(int t = 0; t < vms; t++){
+		// 	cout << "bandwidth vms: " << t << endl;
+		// 	for(int i = 0; i < vms; i++){
+		// 		for(int j = 0; j < vms; j++){
+		// 			cout << this->vms[t]->bandwidth[i][j] << " ";
+		// 		}
+		// 		cout << endl;
+		// 	}
+		// }
+		// cin.get();
+
+		// esquerda antes da direita
+		for(int i = 0; i < this->jobs.size(); i++){
+			vector<int> line(this->jobs.size(), 0);
+			for(int ti = 0; ti < this->jobs[i]->input.size(); ti++){
+				if(this->jobs[i]->input[ti]->is_static)
+					continue;
+				int jobID;
+				for(int j = 0; j < this->jobs.size(); j++){
+					if (i == j) continue;
+					bool stop = false;
+					for(int tj = 0; tj < this->jobs[j]->output.size(); tj++){
+						if(this->jobs[j]->output[tj]->id == this->jobs[i]->input[ti]->id){
+							stop = true;
+							jobID = this->jobs[j]->id;
+							break;
+						}
+					}
+					if(stop) break;
+				}
+				line[jobID] = 1;		
+			}
+			conflicts.push_back(line);
+		}
+
+		// cout << "Conflicts: " << endl;
+		// for(int i = 0; i < this->jobs.size(); i++){
+		// 	for(int j = 0; j < this->jobs.size(); j++){
+		// 		cout << conflicts[i][j] << " ";
+		// 	}
+		// 	cout << endl;
+		// }
+		// cin.get();
+		// cout << "Finished Reading!" << endl;
 	}
 
 	~Problem() { 

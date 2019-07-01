@@ -39,9 +39,9 @@ class Mils{
                     for (int j = 0; j < p->alloc.size(); j++){
                         if(i == j) continue;
                         Problem * backup = new Problem(*p);
-                        bool done = p->realocate(i, j);
+                        // bool done = p->realocate(i, j);
                         // delete backup;
-                        // bool done = false;
+                        bool done = false;
                         if(done){
                             
                             if(!p->checkFeasible()){
@@ -81,7 +81,7 @@ class Mils{
                 // cout << "EXAUSTED RELOCATE! p->cost was: " << p->calculateMakespam() << endl;
                 for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
                     Problem * backup = new Problem(*p);
-                    lsImprovement = p->swapMachine(i);
+                    // lsImprovement = p->swapMachine(i);
                     if(!p->checkFeasible()){
                         cout << "booom Swap MAchine" << endl;
                         cin.get();
@@ -108,7 +108,7 @@ class Mils{
                 for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
                     for (int j = 0; j < p->alloc.size(); j++){
                         Problem * backup = new Problem(*p);
-                        lsImprovement = p->swapMachineWrite(i);
+                        // lsImprovement = p->swapMachineWrite(i);
                         if(!p->checkFeasible()){
                             cout << "booom Swap Write" << endl;
                             cin.get();
@@ -142,10 +142,10 @@ class Mils{
                 int pChooser = rand() % 2;
                 int pos = rand() % p->alloc.size();
                 if(pChooser == 0){
-                    p->perturbateMachine(pos);
+                    // p->perturbateMachine(pos);
                     *machine = *machine + 1;
                 } else if(pChooser == 1){
-                    p->perturbateWriteTo(pos);
+                    // p->perturbateWriteTo(pos);
                     *write = *write + 1;
                 }
             }

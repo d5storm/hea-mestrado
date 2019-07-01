@@ -568,8 +568,13 @@ int main(int argc, char **argv) {
 
     srandom(setting->seed);
     
-    Problem * emptyProblem = new Problem(name_workflow);
-
+    Problem * p = new Problem(name_workflow);
+    cout << "SOLVALUE: " << p->createSolution(setting->alpha) << endl;
+    cout << "Makespam: " << p->calculateMakespam() << endl;
+    cout << "Cost: " << p->calculateCost() << endl;
+    // p->calculateFO();
+    // p->checkFeasible();
+    // p->print();
 
     //delete setting struct
     delete[] setting;

@@ -58,9 +58,9 @@ class Grasp{
                         for (int j = 0; j < p->alloc.size(); j++){
                             if(i == j) continue;
                             Problem * backup = new Problem(*p);
-                            bool done = p->realocate(i, j);
+                            // bool done = p->realocate(i, j);
                             // delete backup;
-                            // bool done = false;
+                            bool done = false;
                             if(done){
                                 
                                 if(!p->checkFeasible()){
@@ -101,7 +101,7 @@ class Grasp{
                     // cout << "EXAUSTED RELOCATE! p->cost was: " << p->calculateMakespam() << endl;
                     for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
                         Problem * backup = new Problem(*p);
-                        lsImprovement = p->swapMachine(i);
+                        // lsImprovement = p->swapMachine(i);
                         if(!p->checkFeasible()){
                             cout << "booom1" << endl;
                             cin.get();
@@ -129,7 +129,7 @@ class Grasp{
                     for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
                         for (int j = 0; j < p->alloc.size(); j++){
                             Problem * backup = new Problem(*p);
-                            lsImprovement = p->swapMachineWrite(i);
+                            // lsImprovement = p->swapMachineWrite(i);
                             if(lsImprovement){
                                 delete backup;
                                 break;
