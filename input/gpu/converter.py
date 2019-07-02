@@ -23,20 +23,33 @@ class Job(object):
         self.output = []
 
 
+class Machine(object):
+    def __init__(self):
+        self.id = 0
+        self.name = ""
+        self.cpu_slowdown = 0.0
+        self.gpu_slowdown = 0.0
+        self.bandwidth = 0
+        self.storage = 0.0
+        self.cpu_cost = 0.0
+        self.gpu_cost = 0.0
+
+
 def main():
     print("123")
-    file_path = sys.argv[1]
-    file_end = file_path.split(".")[1]
-    file_start = file_path.split(".")[0]
+    workflow_file_path = sys.argv[1]
+    cluster_file_path = sys.argv[2]
+    file_end = workflow_file_path.split(".")[1]
+    file_start = workflow_file_path.split(".")[0]
     gpu_path = file_start + "_gpu" + "." + file_end
 
-    file_reader = open(file_path, "r")
-    # file_writer = open(gpu_path, "w")
+    file_reader = open(workflow_file_path, "r")
 
     lines = file_reader.readlines()
 
     job_dict = {}
     file_dict = {}
+    vm_dict = {}
 
     static_files = 0
     dinamic_files = 0
@@ -62,7 +75,7 @@ def main():
             static_files = int(split_line[0])
             dinamic_files = int(split_line[1])
             total_jobs = int(split_line[2])
-        elif line_added < static_files + 1:
+        elif line < static_files + 1:
             id = split_line[0]
             size = float(split_line[1])
             static_machines_n = int(split_line[2])
@@ -75,7 +88,7 @@ def main():
             new_file.static = True
             new_file.static_list = static_id
             file_dict[id] = new_file
-        elif line_added < dinamic_files + static_files + 1:
+        elif line < dinamic_files + static_files + 1:
             id = split_line[0]
             size = float(split_line[1])
             new_file = File()
@@ -83,7 +96,7 @@ def main():
             new_file.size = size
             new_file.static = False
             file_dict[id] = new_file
-        elif line_added < dinamic_files + static_files + total_jobs:
+        elif line < dinamic_files + static_files + total_jobs + 1:
             id = split_line[0]
             name = split_line[1]
             cpu_time = float(split_line[2])
@@ -96,8 +109,7 @@ def main():
             output_list = []
             if gpu_possible == 1:
                 gpu = True
-                gpu_time = random.uniform(float(cpu_time) * 0.3, float(cpu_time) * 0.7)
-
+                gpu_time = float("{0:.2f}".format(random.uniform(float(cpu_time) * 0.3, float(cpu_time) * 0.7)))
             for i in range(line + 1, line + total_input + 1):
                 input_list.append(lines[i])
                 add_line += 1
@@ -116,6 +128,107 @@ def main():
 
             job_dict[id] = new_job
 
+    file_reader.close()
+    file_reader = open(cluster_file_path, "r")
+    lines = file_reader.readlines()
+    read_line = lines[1]
+    split_line = read_line.split(" ")
+    total_vms = int(split_line[len(split_line) - 1])
+    for vm in range(2, total_vms + 2):
+        read_line = lines[vm]
+        split_line = read_line.split(" ")
+        id = int(split_line[0])
+        name = split_line[1]
+        cpu_slowdown = float(split_line[2])
+        gpu_slowdown = float("{0:.2f}".format(random.uniform(float(cpu_slowdown) * 0.3, float(cpu_slowdown) * 0.7)))
+        storage = float(split_line[3]) * 1024.0
+        bandwidth = float(split_line[4])
+        cpu_cost = float(split_line[5])
+        gpu_cost = float("{0:.2f}".format(random.uniform(float(cpu_cost) * 2.0, float(cpu_cost) * 10.0)))
+        new_machine = Machine()
+        new_machine.bandwidth = bandwidth
+        new_machine.cpu_cost = cpu_cost
+        new_machine.cpu_slowdown = cpu_slowdown
+        new_machine.gpu_cost = gpu_cost
+        new_machine.gpu_slowdown = gpu_slowdown
+        new_machine.id = id
+        new_machine.storage = storage
+        new_machine.name = name
+        vm_dict[id] = new_machine
+
+    bandwidth_matrix = []
+
+    for i in range(0, total_vms):
+        band_line = []
+        for j in range(0, total_vms):
+            if i == j:
+                band_line.append(0)
+            else:
+                min_band = vm_dict[i].bandwidth
+                if vm_dict[j].bandwidth < min_band:
+                    min_band = vm_dict[j].bandwidth
+                band_line.append(min_band)
+        bandwidth_matrix.append(band_line)
+
+    file_reader.close()
+    # WRITING NEW FILE!
+    file_writer = open(gpu_path, "w")
+
+    file_writer.write("{} {} {}\n".format(total_jobs, static_files + dinamic_files, total_vms))
+    for job in job_dict:
+        jobObj = job_dict[job]
+        file_writer.write("{} {} {} {}".format(jobObj.id, jobObj.cpu_time, jobObj.gpu_time, len(jobObj.input)))
+        for inp in jobObj.input:
+            file_writer.write(" {}".format(inp.replace("\n", "")))
+        file_writer.write(" {}".format(len(jobObj.output)))
+        for out in jobObj.output:
+            file_writer.write(" {}".format(out.replace("\n", "")))
+        file_writer.write("\n")
+
+    for file in file_dict:
+        fileObj = file_dict[file]
+        if fileObj.static:
+            file_writer.write("{} {} 1 {}".format(fileObj.id, fileObj.size, len(fileObj.static_list)))
+            for static in fileObj.static_list:
+                file_writer.write(" {}".format(static))
+        else:
+            file_writer.write("{} {} 0".format(fileObj.id, fileObj.size))
+        file_writer.write("\n")
+
+    for i in range(0, 5):
+        if i == 0:
+            for vm in vm_dict:
+                vmObj = vm_dict[vm]
+                file_writer.write("{} ".format(vmObj.cpu_slowdown))
+            file_writer.write("\n")
+        if i == 1:
+            for vm in vm_dict:
+                vmObj = vm_dict[vm]
+                file_writer.write("{} ".format(vmObj.gpu_slowdown))
+            file_writer.write("\n")
+        if i == 2:
+            for vm in vm_dict:
+                vmObj = vm_dict[vm]
+                file_writer.write("{} ".format(vmObj.storage))
+            file_writer.write("\n")
+        if i == 3:
+            for vm in vm_dict:
+                vmObj = vm_dict[vm]
+                file_writer.write("{} ".format(vmObj.cpu_cost))
+            file_writer.write("\n")
+        if i == 4:
+            for vm in vm_dict:
+                vmObj = vm_dict[vm]
+                file_writer.write("{} ".format(vmObj.gpu_cost))
+            file_writer.write("\n")
+
+    for i in range(0, total_vms):
+        for j in range(0, total_vms):
+            file_writer.write("{} ".format(bandwidth_matrix[i][j]))
+        file_writer.write("\n")
+
+    file_writer.close()
     print("123")
+
 
 main()

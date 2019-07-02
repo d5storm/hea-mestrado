@@ -1,0 +1,89 @@
+30 49 4
+ID00028 38.94 19.08 3 FFI_0_2_txt.variation-s08580-h01104 FFI_0_2_subfx.sgt FFI_0_2_subfy.sgt 1 Seismogram_FFI_0_2_ID00028.grm
+ID00019 0.93 0.0 1 FFI_0_2_subfx.sgt 1 FFI_0_2_subfy.sgt
+ID00018 61.96 32.76 3 FFI_0_2_subfy.sgt Seismogram_FFI_0_2_ID00028.grm ID00019 PeakValCalcOkaya 0.93 1 1 1 Seismogram_FFI_0_2_ID00018.grm
+ID00029 0.67 0.0 1 Seismogram_FFI_0_2_ID00028.grm 1 ID00019 PeakValCalcOkaya 0.93 1 1
+ID00015 1.29 0.45 1 ID00019 PeakValCalcOkaya 0.93 1 1 1 Seismogram_FFI_0_2_ID00018.grm
+ID00014 55.92 26.8 3 Seismogram_FFI_0_2_ID00018.grm PeakVals_FFI_0_2_ID00018.bsa ID00018 SeismogramSynthesis 61.96 3 1 1 FFI_0_2_txt.variation-s08845-h09162
+ID00017 0.65 0.0 1 PeakVals_FFI_0_2_ID00018.bsa 1 ID00018 SeismogramSynthesis 61.96 3 1
+ID00016 44.64 30.29 3 ID00018 SeismogramSynthesis 61.96 3 1 FFI_0_2_txt.variation-s08845-h09162 FFI_0_2_subfx.sgt 1 FFI_0_2_subfy.sgt
+ID00011 37.9 13.46 3 FFI_0_2_txt.variation-s08845-h09162 FFI_0_2_subfx.sgt FFI_0_2_subfy.sgt 1 Seismogram_FFI_0_2_ID00018.grm
+ID00010 0.92 0.0 1 FFI_0_2_subfx.sgt 1 FFI_0_2_subfy.sgt
+ID00013 193.19 0.0 3 FFI_0_2_subfy.sgt Seismogram_FFI_0_2_ID00018.grm ID00029 PeakValCalcOkaya 0.67 1 1 2 Seismogram_FFI_0_2_ID00028.grm PeakVals_FFI_0_2_ID00028.bsa
+ID00012 1.33 0.5 1 Seismogram_FFI_0_2_ID00018.grm 1 ID00029 PeakValCalcOkaya 0.67 1 1
+ID00020 28.78 13.0 3 ID00029 PeakValCalcOkaya 0.67 1 1 Seismogram_FFI_0_2_ID00028.grm PeakVals_FFI_0_2_ID00028.bsa 1 ID00015 PeakValCalcOkaya 1.29 1 1
+ID00021 0.63 0.0 1 Seismogram_FFI_0_2_ID00028.grm 1 PeakVals_FFI_0_2_ID00028.bsa
+ID00008 0.89 0.27 1 PeakVals_FFI_0_2_ID00028.bsa 1 ID00015 PeakValCalcOkaya 1.29 1 1
+ID00009 49.04 16.62 3 ID00015 PeakValCalcOkaya 1.29 1 1 Seismogram_FFI_0_2_ID00014.grm PeakVals_FFI_0_2_ID00014.bsa 1 ID00014 SeismogramSynthesis 55.92 3 1
+ID00024 50.78 20.78 3 Seismogram_FFI_0_2_ID00014.grm PeakVals_FFI_0_2_ID00014.bsa ID00014 SeismogramSynthesis 55.92 3 1 1 FFI_0_2_txt.variation-s02624-h09712
+ID00025 1.31 0.55 1 PeakVals_FFI_0_2_ID00014.bsa 1 ID00014 SeismogramSynthesis 55.92 3 1
+ID00026 40.8 0.0 3 ID00014 SeismogramSynthesis 55.92 3 1 FFI_0_2_txt.variation-s02624-h09712 FFI_0_2_subfx.sgt 1 FFI_0_2_subfy.sgt
+ID00027 1.27 0.0 1 FFI_0_2_txt.variation-s02624-h09712 1 FFI_0_2_subfx.sgt
+ID00002 78.74 48.12 3 FFI_0_2_subfx.sgt FFI_0_2_subfy.sgt Seismogram_FFI_0_2_ID00014.grm 2 ID00017 PeakValCalcOkaya 0.65 1 1 Seismogram_FFI_0_2_ID00016.grm
+ID00003 22.5 0.0 3 FFI_0_2_subfy.sgt Seismogram_FFI_0_2_ID00014.grm ID00017 PeakValCalcOkaya 0.65 1 1 1 Seismogram_FFI_0_2_ID00016.grm
+ID00000 0.06 0.02 13 Seismogram_FFI_0_2_ID00014.grm ID00017 PeakValCalcOkaya 0.65 1 1 Seismogram_FFI_0_2_ID00016.grm PeakVals_FFI_0_2_ID00016.bsa ID00016 SeismogramSynthesis 44.64 3 1 FFI_0_2_txt.variation-s05646-h00806 FFI_0_2_subfx.sgt FFI_0_2_subfy.sgt Seismogram_FFI_0_2_ID00016.grm ID00011 SeismogramSynthesis 37.9 3 1 FFI_0_1_txt.variation-s07436-h08820 FFI_0_1_subfx.sgt FFI_0_1_subfy.sgt 1 Seismogram_FFI_0_1_ID00011.grm
+ID00001 0.08 0.03 13 ID00017 PeakValCalcOkaya 0.65 1 1 Seismogram_FFI_0_2_ID00016.grm PeakVals_FFI_0_2_ID00016.bsa ID00016 SeismogramSynthesis 44.64 3 1 FFI_0_2_txt.variation-s05646-h00806 FFI_0_2_subfx.sgt FFI_0_2_subfy.sgt Seismogram_FFI_0_2_ID00016.grm ID00011 SeismogramSynthesis 37.9 3 1 FFI_0_1_txt.variation-s07436-h08820 FFI_0_1_subfx.sgt FFI_0_1_subfy.sgt Seismogram_FFI_0_1_ID00011.grm 1 ID00010 PeakValCalcOkaya 0.92 1 1
+ID00006 1.25 0.59 1 Seismogram_FFI_0_2_ID00016.grm 1 PeakVals_FFI_0_2_ID00016.bsa
+ID00007 31.02 17.16 3 PeakVals_FFI_0_2_ID00016.bsa ID00016 SeismogramSynthesis 44.64 3 1 FFI_0_2_txt.variation-s05646-h00806 1 FFI_0_2_subfx.sgt
+ID00004 0.87 0.0 1 ID00016 SeismogramSynthesis 44.64 3 1 1 FFI_0_2_txt.variation-s05646-h00806
+ID00005 42.67 29.07 3 FFI_0_2_txt.variation-s05646-h00806 FFI_0_2_subfx.sgt FFI_0_2_subfy.sgt 1 Seismogram_FFI_0_2_ID00016.grm
+ID00022 38.12 0.0 3 FFI_0_2_subfx.sgt FFI_0_2_subfy.sgt Seismogram_FFI_0_2_ID00016.grm 1 ID00011 SeismogramSynthesis 37.9 3 1
+ID00023 1.5 0.96 1 FFI_0_2_subfy.sgt 1 Seismogram_FFI_0_2_ID00016.grm
+FFI_0_1_fx.sgt 18897.6680574 1 1 0
+FFI_0_2_txt.variation-s09479-h02338 4.94854259491 1 1 0
+FFI_0_2_txt.variation-s03955-h02403 1.88186645508 1 1 0
+FFI_0_2_txt.variation-s08845-h09162 1.87144756317 1 1 0
+FFI_0_2_fx.sgt 18460.3403292 1 1 0
+FFI_0_2_txt.variation-s02400-h00543 2.86559104919 1 1 0
+FFI_0_2_txt.variation-s04772-h05300 4.54945850372 1 1 0
+FFI_0_1_txt.variation-s02186-h02600 2.70447731018 1 1 0
+FFI_0_2_txt.variation-s05646-h00806 2.122174263 1 1 0
+FFI_0_1_fy.sgt 18897.6680574 1 1 0
+FFI_0_1_txt.variation-s04762-h01072 2.72781944275 1 1 0
+FFI_0_2_txt.variation-s02624-h09712 3.37824726105 1 1 0
+FFI_0_1_txt.variation-s06578-h01433 2.43946170807 1 1 0
+FFI_0_2_fy.sgt 18460.3403292 1 1 0
+FFI_0_2_txt.variation-s08580-h01104 4.42413425446 1 1 0
+FFI_0_1_txt.variation-s07436-h08820 3.20485877991 1 1 0
+FFI_0_1_txt.variation-s07544-h01299 2.60556030273 1 1 0
+Seismogram_FFI_0_2_ID00018.grm 0.0228881835938 0
+Seismogram_FFI_0_2_ID00028.grm 0.0228881835938 0
+Seismogram_FFI_0_1_ID00009.grm 0.0228881835938 0
+FFI_0_2_subfx.sgt 242.307585716 0
+Seismogram_FFI_0_2_ID00016.grm 0.0228881835938 0
+PeakVals_FFI_0_2_ID00022.bsa 0.000205993652344 0
+PeakVals_FFI_0_2_ID00024.bsa 0.000205993652344 0
+FFI_0_1_subfy.sgt 126.156052589 0
+PeakVals_FFI_0_1_ID00011.bsa 0.000205993652344 0
+Seismogram_FFI_0_2_ID00026.grm 0.0228881835938 0
+PeakVals_FFI_0_2_ID00014.bsa 0.000205993652344 0
+PeakVals_FFI_0_2_ID00028.bsa 0.000205993652344 0
+Seismogram_FFI_0_1_ID00011.grm 0.0228881835938 0
+Cybershake_PSA.zip 0.000164031982422 0
+PeakVals_FFI_0_1_ID00009.bsa 0.000205993652344 0
+PeakVals_FFI_0_1_ID00007.bsa 0.000205993652344 0
+Seismogram_FFI_0_1_ID00005.grm 0.0228881835938 0
+Seismogram_FFI_0_2_ID00022.grm 0.0228881835938 0
+PeakVals_FFI_0_2_ID00018.bsa 0.000205993652344 0
+PeakVals_FFI_0_1_ID00005.bsa 0.000205993652344 0
+PeakVals_FFI_0_1_ID00003.bsa 0.000205993652344 0
+PeakVals_FFI_0_2_ID00026.bsa 0.000205993652344 0
+PeakVals_FFI_0_2_ID00016.bsa 0.000205993652344 0
+Seismogram_FFI_0_1_ID00003.grm 0.0228881835938 0
+PeakVals_FFI_0_2_ID00020.bsa 0.000205993652344 0
+FFI_0_2_subfy.sgt 242.307585716 0
+Seismogram_FFI_0_2_ID00014.grm 0.0228881835938 0
+Seismogram_FFI_0_2_ID00024.grm 0.0228881835938 0
+Seismogram_FFI_0_2_ID00020.grm 0.0228881835938 0
+Seismogram_FFI_0_1_ID00007.grm 0.0228881835938 0
+FFI_0_1_subfx.sgt 126.156052589 0
+Cybershake_Seismograms.zip 0.0177927017212 0
+1.53 0.77 0.38 0.19 
+0.8 0.3 0.19 0.09 
+81920.0 122880.0 163840.0 204800.0 
+0.1 0.1 0.1 0.1 
+0.78 0.65 0.63 0.79 
+0 4.0 4.0 4.0 
+4.0 0 9.0 9.0 
+4.0 9.0 0 10.0 
+4.0 9.0 10.0 0 
