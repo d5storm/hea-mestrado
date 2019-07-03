@@ -36,7 +36,6 @@ class Machine(object):
 
 
 def main():
-    print("123")
     workflow_file_path = sys.argv[1]
     cluster_file_path = sys.argv[2]
     file_end = workflow_file_path.split(".")[1]
@@ -49,6 +48,7 @@ def main():
 
     job_dict = {}
     file_dict = {}
+    file_code_dict = {}
     vm_dict = {}
 
     static_files = 0
@@ -83,7 +83,8 @@ def main():
             for i in range(3, 3 + static_machines_n):
                 static_id.append(int(split_line[i]))
             new_file = File()
-            new_file.id = id
+            file_code_dict[id] = len(file_code_dict)
+            new_file.id = file_code_dict[id]
             new_file.size = size
             new_file.static = True
             new_file.static_list = static_id
@@ -92,7 +93,8 @@ def main():
             id = split_line[0]
             size = float(split_line[1])
             new_file = File()
-            new_file.id = id
+            file_code_dict[id] = len(file_code_dict)
+            new_file.id = file_code_dict[id]
             new_file.size = size
             new_file.static = False
             file_dict[id] = new_file
@@ -110,11 +112,11 @@ def main():
             if gpu_possible == 1:
                 gpu = True
                 gpu_time = float("{0:.2f}".format(random.uniform(float(cpu_time) * 0.3, float(cpu_time) * 0.7)))
-            for i in range(line + 1, line + total_input + 1):
-                input_list.append(lines[i])
+            for i in range(line_added + 1, line_added + total_input + 1):
+                input_list.append(file_code_dict[lines[i].replace("\n", "")])
                 add_line += 1
-            for i in range(line + total_input + 1, line + total_input + 1 + total_output):
-                output_list.append(lines[i])
+            for i in range(line_added + total_input + 1, line_added + total_input + 1 + total_output):
+                output_list.append(file_code_dict[lines[i].replace("\n", "")])
                 add_line += 1
 
             new_job = Job()
@@ -179,10 +181,10 @@ def main():
         jobObj = job_dict[job]
         file_writer.write("{} {} {} {}".format(jobObj.id, jobObj.cpu_time, jobObj.gpu_time, len(jobObj.input)))
         for inp in jobObj.input:
-            file_writer.write(" {}".format(inp.replace("\n", "")))
+            file_writer.write(" {}".format(inp))
         file_writer.write(" {}".format(len(jobObj.output)))
         for out in jobObj.output:
-            file_writer.write(" {}".format(out.replace("\n", "")))
+            file_writer.write(" {}".format(out))
         file_writer.write("\n")
 
     for file in file_dict:
@@ -227,8 +229,11 @@ def main():
             file_writer.write("{} ".format(bandwidth_matrix[i][j]))
         file_writer.write("\n")
 
+    file_writer.write("\n\n\n\nMAPING **************** \n")
+
+    for id in file_code_dict:
+        file_writer.write("{} -> {}\n".format(id, file_code_dict[id]))
     file_writer.close()
-    print("123")
 
 
 main()

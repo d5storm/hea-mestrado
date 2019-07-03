@@ -15,7 +15,7 @@ using namespace std;
 class Item{
 public:
 	int id = -1;
-	string name;
+	int name;
 	double size;
 	int alocated_vm_id = -1;
 	vector<int> static_vms;
@@ -23,8 +23,8 @@ public:
 	vector<double> IOTimeCost;
 	vector<double> VMsBandwidth;
 	Item(){};
-	Item(string name, int id, double size) : name(name), id(id), size(size), is_static(false) {}
-	Item(string name, int id, double size, vector<int> static_vms) : name(name), id(id), size(size), is_static(true), static_vms(static_vms) {}
+	Item(int name, int id, double size) : name(name), id(id), size(size), is_static(false) {}
+	Item(int name, int id, double size, vector<int> static_vms) : name(name), id(id), size(size), is_static(true), static_vms(static_vms) {}
 };
 
 class Job{
@@ -314,6 +314,8 @@ public:
 	vector<Job*> jobs;
 	vector<Machine*> vms;
 	vector<Allocation*> alloc;
+	vector<string> name_map;
+	vector<int> name_map_code;
 	double maxTime, maxCost;
 	double ponderation = 0.5;
 
@@ -331,6 +333,8 @@ public:
 	Problem(const Problem &p){
 		this->conflicts = p.conflicts;
 		this->notParallelable = p.notParallelable;
+		this->name_map = p.name_map;
+		this->name_map_code = p.name_map_code;
 
 		for(unsigned int i = 0; i < p.files.size(); i++){			
 				Item * copiedItem = p.files[i];
@@ -713,14 +717,23 @@ public:
 		// cin.get();
 	}
 
-	Item * getFileByName(string name){
+	Item * getFileByName(int name){
+		Item * to_return = NULL;
+
+		// if(name == "PeakVals_FFI_0_2_ID00018.bsa"){
+		// 	cin.get();
+		// }
 		for(unsigned int i = 0; i < this->files.size(); i++){
 			// cout << "FileName: |" << this->files[i]->name << "|" << name << "|" << endl;
 			// if(this->files[i]->name == name) cout << "EQUAL" << endl;
 			if(this->files[i]->name == name)
-				return this->files[i];
+				to_return = this->files[i];
 		}
-		return NULL;
+		if(to_return == NULL){
+			cout << "Could not find file with name: " << name << endl;
+			cin.get();
+		}
+		return to_return;
 	}
 
 	Job * getJobByName(string name){
@@ -744,7 +757,7 @@ public:
 		int jobs = stoi(tokens[0]);
 		int files = stoi(tokens[1]);
 		int vms = stoi(tokens[2]);
-
+		
 		// cout << "Jobs: " << jobs << " files: " << files << " vms: " << vms << endl;
 
 		vector<string> job_lines;
@@ -760,10 +773,14 @@ public:
 			getline(in_file, line);
 			// cout << "ReadLine: " << line << endl;
 			boost::split(tokens, line, boost::is_any_of(" "));
-			string file_name = tokens[0];
+			int file_name = stoi(tokens[0]);
+			// cout << "Filename: " << file_name << " f: " << f << endl;
+			// name_map.push_back(file_name);
+			// file_name = to_string(f);
+			// name_map_code.push_back(f);
 			double file_size = stod(tokens[1]);
 			int is_static = stoi(tokens[2]);
-			// cout << "file_name: " << file_name << " file_size: " << file_size << " is_static: " << is_static << endl;
+			// cout << "file_name: |" << file_name << "| file_size: " << file_size << " is_static: " << is_static << endl;
 			Item * newItem;
 			if(is_static == 1){
 				int n_static_vms = stoi(tokens[3]);
@@ -780,6 +797,8 @@ public:
 		}
 
 		// cout << "Finished reading files.." << endl;
+		// cin.get();
+
 		double total_time_job_cpu = 0.0;
 		double total_time_job_gpu = 0.0;
 		for(int j = 0; j < jobs; j++){
@@ -787,6 +806,7 @@ public:
 			// cout << "Stored line: " << line << endl;
 			boost::split(tokens, line, boost::is_any_of(" "));
 			string job_name = tokens[0];
+
 			double cpu_time = stod(tokens[1]);
 			total_time_job_cpu += cpu_time;
 			double gpu_time = stod(tokens[2]);
@@ -796,18 +816,15 @@ public:
 			vector<Item*> input, output;
 			for(int i = 0; i < n_input; i++){
 				// cout << "Reading pos: " << 4+i << endl;
-				string id = tokens[4+i];
-				Item * item = this->getFileByName(id);
+				int id = stoi(tokens[4+i]);
+				Item * item = this->files[id];
 				input.push_back(item);
 			}
 			int n_output = stoi(tokens[4+n_input]);
 			// cout << "n_output: " << n_output << endl;
 			for(int i = 0; i < n_output; i++){
-				string id = tokens[4+n_input+1+i];
-				// cout << "READ ID: " << id << endl;
-				Item * item = this->getFileByName(id);
-				// cout << "Recovered item id: " << item->id << endl;
-				// cin.get();
+				int id = stoi(tokens[4+n_input+1+i]);
+				Item * item = this->files[id];
 				output.push_back(item);
 			}
 			// cout << "ALOW" << endl;
@@ -890,16 +907,14 @@ public:
 		// cin.get();
 
 
+		
 		vector<vector<string>> transfer;
-		getline(in_file, line);
-		boost::split(tokens, line, boost::is_any_of(" "));
-		transfer.push_back(tokens);
-		getline(in_file, line);
-		boost::split(tokens, line, boost::is_any_of(" "));
-		transfer.push_back(tokens);
-		getline(in_file, line);
-		boost::split(tokens, line, boost::is_any_of(" "));
-		transfer.push_back(tokens);
+		for(int i = 0; i < vms; i++){
+			getline(in_file, line);
+			// cout << "NewLine: " << line << endl;
+			boost::split(tokens, line, boost::is_any_of(" "));
+			transfer.push_back(tokens);
+		}
 
 		for(int i = 0; i < vms; i++){
 			for(int t = 0; t < vms; t++){
@@ -914,7 +929,7 @@ public:
 		}
 
 		// for(int t = 0; t < vms; t++){
-		// 	cout << "bandwidth vms: " << t << endl;
+		// 	// cout << "bandwidth vms: " << t << endl;
 		// 	for(int i = 0; i < vms; i++){
 		// 		for(int j = 0; j < vms; j++){
 		// 			cout << this->vms[t]->bandwidth[i][j] << " ";
@@ -925,17 +940,29 @@ public:
 		// cin.get();
 
 		// esquerda antes da direita
+		// cout << "jobs size: " << this->jobs.size() << endl;
 		for(int i = 0; i < this->jobs.size(); i++){
+			// cout << "i: " << i << endl;
 			vector<int> line(this->jobs.size(), 0);
 			for(int ti = 0; ti < this->jobs[i]->input.size(); ti++){
+				// cout << "ti: " << ti << endl;
 				if(this->jobs[i]->input[ti]->is_static)
 					continue;
-				int jobID;
+				int jobID = -1;
 				for(int j = 0; j < this->jobs.size(); j++){
+					// cout << "j: " << j << endl;
 					if (i == j) continue;
 					bool stop = false;
 					for(int tj = 0; tj < this->jobs[j]->output.size(); tj++){
+						// cout << "tj: " << tj << endl;
+						// cout << "this->jobs[i]->input[ti]->id: " << this->jobs[i]->input[ti]->id << endl;
+						// cout << "this->jobs[j]->output.size()': " << this->jobs[j]->output.size() << endl;
+						// cout << "this->jobs[j]->output[tj]: " << this->jobs[j]->output[tj] << endl;
+						// cout << "this->jobs[j]->name: " << this->jobs[j]->name << endl;
+						// cout << "this->jobs[j]->output[tj]->id: " << this->jobs[j]->output[tj]->id << endl;
+						
 						if(this->jobs[j]->output[tj]->id == this->jobs[i]->input[ti]->id){
+							// cout << "entrou if" << endl;
 							stop = true;
 							jobID = this->jobs[j]->id;
 							break;
@@ -943,6 +970,7 @@ public:
 					}
 					if(stop) break;
 				}
+				// cout << "JOBID: " << jobID << endl;
 				line[jobID] = 1;		
 			}
 			conflicts.push_back(line);
@@ -957,6 +985,7 @@ public:
 		// }
 		// cin.get();
 		// cout << "Finished Reading!" << endl;
+		// cin.get();
 	}
 
 	~Problem() { 

@@ -563,13 +563,13 @@ int main(int argc, char **argv) {
     string name_workflow, name_cluster;
 
     setting = new Settings_struct();
-
+    // cout << "Start setup" << endl;
     setupCmd(argc, argv, name_workflow, name_cluster);
-
+    // cout << "End setup" << endl;
     srandom(setting->seed);
     
     Problem * p = new Problem(name_workflow);
-    cout << "SOLVALUE: " << p->createSolution(setting->alpha) << endl;
+    p->createSolution(setting->alpha);
     cout << "Makespam: " << p->calculateMakespam() << endl;
     cout << "Cost: " << p->calculateCost() << endl;
     // p->calculateFO();
