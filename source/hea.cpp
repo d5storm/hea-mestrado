@@ -430,9 +430,10 @@ Chromosome run(string name_workflow, string name_cluster)  {
     // Do generation
     int i = 0;
     // start stop clock
-
+    clock_t heur_clock_start = clock();
     while (i < setting->num_generations) {
-
+        if (double(clock() - heur_clock_start)/CLOCKS_PER_SEC >= 1800.0)
+            break;
         // Do local Search ?
 
         float doit = (float) random() / (float) RAND_MAX;
@@ -472,7 +473,8 @@ Chromosome run(string name_workflow, string name_cluster)  {
         }
 
         if (setting->verbose && (i % setting->print_gen) == 0)
-            cout << "Gen: " << i << " Fitness: " << best.fitness / 60.0 << "(s)" << endl;
+            // cout << "Gen: " << i << " Fitness: " << best.fitness / 60.0 << "(s)" << endl;
+            // cout << "Gen: " << i << " Fitness: " << best.fitness << endl;
 
         i += 1;
 
@@ -546,7 +548,7 @@ int main(int argc, char **argv) {
     }
 
     
-    cout << best.fitness / 60.0 << " " << elapseSecs / 60.0 << endl;
+    cout << best.fitness << " " << elapseSecs << endl;
         
 
 
