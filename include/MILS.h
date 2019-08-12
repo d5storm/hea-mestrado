@@ -194,6 +194,7 @@ class Mils{
                 p->createSolution(this->alpha);
                 // cout << "Solution created!" << endl;
                 // cout << "Cost: " << p->calculateMakespam() << endl;
+                
 
                 // p->printAlloc();
                 if(!p->checkFeasible()){
