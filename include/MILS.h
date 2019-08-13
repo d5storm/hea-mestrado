@@ -87,7 +87,13 @@ class Mils{
                 // cout << "EXAUSTED RELOCATE! p->cost was: " << p->calculateMakespam() << endl;
                 for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
                     Problem * backup = new Problem(*p);
+                    p->print();
+                    cout << "*************\n" << endl;
+                    p->test_swapMachine(i);
+                    cout << "*****" << endl;
                     lsImprovement = p->swapMachine(i);
+                    // cout << "improvement: " << lsImprovement << endl;
+                    cin.get();
                     if(!p->checkFeasible()){
                         cout << "booom Swap MAchine" << endl;
                         cin.get();
@@ -192,9 +198,10 @@ class Mils{
                 // }
                 p = new Problem(*this->blankProblem);
                 p->createSolution(this->alpha);
+                // cin.get();
                 // cout << "Solution created!" << endl;
                 // cout << "Cost: " << p->calculateMakespam() << endl;
-                
+
 
                 // p->printAlloc();
                 if(!p->checkFeasible()){
