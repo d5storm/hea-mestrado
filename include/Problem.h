@@ -516,7 +516,6 @@ public:
 
 		// cout << "WRITE_TO: " << write_vm_id << endl;
 
-		int best_i = -1;
 		for(unsigned int i = 0; i < this->vms.size(); i++){
 			Machine * testVm = this->vms[i];
 			if(testVm->id == originalAllocationMachine->id) continue;
@@ -545,7 +544,7 @@ public:
 				return i;
 			}
 		}
-		return best_i;
+		return -1;
 
 	}
 
@@ -661,6 +660,199 @@ public:
 		}
 
 		return false;
+	}
+
+	double calculate_swapMachineWrite_effect(int allocPos, Job* job, double newTime, vector<int>& output, int vmId, vector<double> &newStartTimes, vector<double> &newFinishTimes){
+		// print();
+		// cout << "newTime: " << newTime  << " vmId: " << vmId << endl;
+		
+		for(int a = 0; a < alloc.size(); a++){ // preenchendo inicio e fim original
+			int jobId = alloc[a]->job->id;
+			Machine * vm = alloc[a]->vms;
+			int posOnVm = vm->jobPosOnTimeline(jobId);
+			newStartTimes[jobId] = vm->timelineStartTime[posOnVm];
+			newFinishTimes[jobId] = vm->timelineFinishTime[posOnVm];
+		}
+
+		// for(int i = 0; i < newStartTimes.size(); i++){
+		// 	if(jobs[i]->alocated_vm_id == job->alocated_vm_id)
+		// 		cout << "Id: " << i << " Start: " << newStartTimes[i] << " Finish: " << newFinishTimes[i] << endl;
+		// }
+		// cin.get();
+
+		newFinishTimes[alloc[allocPos]->job->id] = newStartTimes[alloc[allocPos]->job->id] + newTime; // tempo de fim
+
+		double latestJobConflictFinish = 0.0;
+		double latestJobVmFinish = 0.0;
+
+		for(int a = allocPos + 1; a < alloc.size(); a++){ // recalculando start e finish seguindo a ordem de allocation
+			latestJobConflictFinish = 0.0;
+			latestJobVmFinish = 0.0;
+			int aPosOnVm = alloc[a]->vms->jobPosOnTimeline(alloc[a]->job->id);
+
+			double execTime = alloc[a]->vms->timelineFinishTime[aPosOnVm] - alloc[a]->vms->timelineStartTime[aPosOnVm] - calculateReadtime(alloc[a]->job, alloc[a]->vms->id);
+			// double writeTime = calculateWritetime(alloc[a]->job, alloc[a]->vms->id, alloc[a]->writeTo);
+			// double processTime = ceil(alloc[a]->job->base_time * alloc[a]->vms->slowdown);
+			
+			double readTime = 0.0;
+
+			for(int f = 0; f < alloc[a]->job->input.size(); f++){
+				int minBandwidthVm = alloc[a]->vms->id;
+				if(alloc[a]->job->input[f]->is_static){
+					bool transferNeed = true;
+					double maxBandwidth = 0.0;
+					int id;
+					for(int j = 0; j < alloc[a]->job->input[f]->static_vms.size(); j++){
+						if(alloc[a]->vms->id == alloc[a]->job->input[f]->static_vms[j]){
+							transferNeed = false;
+							break;
+						}
+						if(alloc[a]->job->input[f]->VMsBandwidth[alloc[a]->job->input[f]->static_vms[j]] > maxBandwidth){
+							maxBandwidth = alloc[a]->job->input[f]->VMsBandwidth[alloc[a]->job->input[f]->static_vms[j]];
+							id = alloc[a]->job->input[f]->static_vms[j];
+						}
+					}
+
+					if(maxBandwidth < alloc[a]->job->input[f]->VMsBandwidth[alloc[a]->vms->id])
+						minBandwidthVm = id;
+					if(transferNeed) readTime += alloc[a]->job->input[f]->IOTimeCost[minBandwidthVm];
+				} else{
+					// cout << "Not Static!" << endl;
+					Item * file = alloc[a]->job->input[f];
+					int origin =  file->alocated_vm_id;
+					for(int i = 0; i < output.size(); i++){
+						if(file->id == output[i]){
+							// cout << "Changed VM!" << endl;
+							origin = vmId;						
+							break;			
+						}
+					}				
+					if(origin == alloc[a]->vms->id) continue;
+
+					if(alloc[a]->job->input[f]->VMsBandwidth[origin] < alloc[a]->job->input[f]->VMsBandwidth[minBandwidthVm])
+						minBandwidthVm = origin;
+					// cout << "ReadTime += " <<  alloc[a]->job->input[f]->IOTimeCost[minBandwidthVm] << endl;
+					readTime += alloc[a]->job->input[f]->IOTimeCost[minBandwidthVm];
+				}
+			}
+			// cout << "execTime: " << execTime + calculateReadtime(alloc[a]->job, alloc[a]->vms->id) << " oldRead: " << calculateReadtime(alloc[a]->job, alloc[a]->vms->id);			
+
+			execTime += readTime;
+
+			// cout << " newRead: " << readTime << " newExec: " << execTime << endl;
+
+			for(int b = 0; b < a; b++){
+				int bPosOnVm = alloc[b]->vms->jobPosOnTimeline(alloc[b]->job->id);
+				int bVmId = alloc[b]->vms->id;
+				if(conflicts[alloc[a]->job->id][alloc[b]->job->id] == 0){ // nao tem conflito
+					if(alloc[a]->vms->id == bVmId){ // esta na mesma maquina
+						if(newFinishTimes[alloc[b]->job->id] > latestJobVmFinish) // terminou mais tarde do que o ultimo da mesma vm
+							latestJobVmFinish = newFinishTimes[alloc[b]->job->id];
+					}
+				} else { // tem conflito
+					if(newFinishTimes[alloc[b]->job->id] > latestJobConflictFinish) // terminou mais tarde do que o ultimo que tenha conflito
+						latestJobConflictFinish = newFinishTimes[alloc[b]->job->id];
+				}
+			}
+			newStartTimes[alloc[a]->job->id] = max(latestJobVmFinish, latestJobConflictFinish); // tempo de comeco
+			newFinishTimes[alloc[a]->job->id] = newStartTimes[alloc[a]->job->id] + execTime; // tempo de fim
+		}
+
+
+
+		// for(int i = 0; i < newStartTimes.size(); i++){
+		// 	// if(jobs[i]->alocated_vm_id == job->alocated_vm_id)
+		// 		cout << "Id: " << i << " Start: " << newStartTimes[i] << " Finish: " << newFinishTimes[i] << endl;
+		// }
+		// cin.get();
+
+		double biggestSpan = 0.0;
+		for(int i = 0; i < newFinishTimes[i]; i++){
+			if(newFinishTimes[i] > biggestSpan)
+				biggestSpan = newFinishTimes[i];
+		}
+
+		return biggestSpan;
+
+	}
+
+	int test_swapMachineWrite(int pos, vector<double> & newStartTimes, vector<double> &newFinishTimes){
+
+		Allocation * swap = this->alloc[pos];
+		Job * job = swap->job;
+		Machine * originalAllocationMachine = swap->vms;
+		double originalCost = this->calculateMakespam();
+
+		// cout << "JobID: " << job->name << endl;
+
+		int posOnTimeline = originalAllocationMachine->jobPosOnTimeline(job->id);
+		double oldExecTime = originalAllocationMachine->timelineFinishTime[posOnTimeline] - originalAllocationMachine->timelineStartTime[posOnTimeline];
+		// cout << "WRITE_TO: " << write_vm_id << endl;
+
+		vector<int> outputs;
+		for(int i = 0; i < job->output.size(); i++){
+			outputs.push_back(job->output[i]->id);
+		}
+
+		for(unsigned int i = 0; i < this->vms.size(); i++){
+			Machine * testVm = this->vms[i];
+			if(testVm->id == swap->writeTo) continue;
+			double readtime = calculateReadtime(job, originalAllocationMachine->id);
+
+			double writetime = calculateWritetime(job, originalAllocationMachine->id, testVm->id);
+
+			double processtime = ceil(job->base_time * originalAllocationMachine->slowdown);
+
+			double newTime = readtime + processtime + writetime;
+
+			
+			
+			// cout << "Calculating cascade effect" << endl;
+			newFinishTimes = vector<double>(this->jobs.size(), 0.0);
+			newStartTimes = vector<double>(this->jobs.size(), 0.0);
+			double newSpan = calculate_swapMachineWrite_effect(pos, job, newTime, outputs, testVm->id, newStartTimes, newFinishTimes);
+			// cout << "JOBID: " << job->id << " i: " << i << " span: " << newSpan << " originalSpan: " << originalCost<< " readtime: " << readtime << " processtime: " << processtime << " writetime: " << writetime << endl;
+
+			// cout << "originalCost: " << originalCost << " newSpan: " << newSpan << " oldExecTime: " << oldExecTime << " newTime: " << newTime << " machinePos: " << i << endl;
+			// cin.get();
+			if(newSpan < originalCost){
+				// cout << "The new Span is: " << newSpan << endl;
+				
+				// cin.get();
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	double execSwapMachineWrite(int pos, int vmId, vector<double>& newStartTimes, vector<double>& newFinishTimes){
+		Job * changedJob = this->alloc[pos]->job;
+		Machine * changedVm = this->vms[vmId];
+
+		for(int a = 0; a < this->alloc.size(); a++){
+			Job * job = this->alloc[a]->job;
+			Machine * vm = this->alloc[a]->vms;
+			int posOnTimeline = vm->jobPosOnTimeline(job->id);
+
+			if(job->id == changedJob->id){
+				// cout << "Is Changed Job!" << endl;
+				for(int f = 0; f < job->output.size(); f++){
+					job->output[f]->alocated_vm_id = vmId;
+				}
+			} 
+			vm->timelineFinishTime[posOnTimeline] = newFinishTimes[job->id];
+			vm->timelineStartTime[posOnTimeline] = newStartTimes[job->id];			
+		}
+
+		this->alloc[pos]->writeTo = vmId;
+
+		// this->calculateMakespam();
+		// this->print();
+
+		// this->checkFeasible();
+		// cin.get();
+
+		return this->calculateMakespam();
 	}
 
 	bool swapMachineWrite(int pos){
@@ -791,7 +983,7 @@ public:
 		// 	cout << "JobID: " << alloc[i]->job->name << " to MachineID: " << alloc[i]->vms->id << " Writing to MachineID: " << alloc[i]->writeTo << endl;
 		// }
 		for(unsigned int i = 0; i < alloc.size(); i++){
-			cout << alloc[i]->job->id << ", ";
+			cout << alloc[i]->job->name << ", ";
 		}
 		cout << endl;
 	}
@@ -1045,11 +1237,12 @@ public:
 				// cout << "JobID: " << CL[chosenMovement]->id << " Was Inserted!" << endl;
 				totalJobs--;
 			}
-			else
-				// cout << "JobID: " << CL[chosenMovement]->id << " Was NOT Inserted!" << endl;
+			else{
+				cout << "JobID: " << CL[chosenMovement]->id << " Was NOT Inserted!" << endl;
 			
 			// cout << "Spam: " << calculateMakespam() << endl;
 			cin.get();
+			}
 
 		}
 		// cout << "Testing solution..." << endl;
@@ -1146,7 +1339,7 @@ public:
 		for(unsigned int i = 0; i < vms.size(); i++){
 			cout << "ID: " << vms[i]->id << " Name:" << vms[i]->name << ": " ;
 			for(unsigned int j = 0; j < vms[i]->timelineJobs.size(); j++){
-				cout << vms[i]->timelineJobs[j]->id << "( " << vms[i]->timelineStartTime[j] << "," << vms[i]->timelineFinishTime[j] << " )" << " ";
+				cout << vms[i]->timelineJobs[j]->name << "( " << vms[i]->timelineStartTime[j] << "," << vms[i]->timelineFinishTime[j] << " )" << " ";
 			}
 			cout << endl;
 		}

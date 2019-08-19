@@ -539,6 +539,8 @@ void setupCmd(int argc, char **argv, string &name_workflow, string &name_cluster
         cmd.add(arg4);
         ValueArg<string> arg5("x", "perturbation", "Value of perturbation", true, "file", "string");
         cmd.add(arg5);
+        ValueArg<string> arg6("t", "time", "Value of max time", false, "file", "string");
+        cmd.add(arg6);
         SwitchArg verbose_arg("v", "verbose", "Output info", cmd, false);
 
         // Parse the args.
@@ -551,6 +553,7 @@ void setupCmd(int argc, char **argv, string &name_workflow, string &name_cluster
         setting->seed = stoi(arg3.getValue());
         setting->alpha = stoi(arg4.getValue()) / 10.0;
         setting->mutation_probability = stoi(arg5.getValue()) / 100.0;
+        setting->time_limit = stod(arg6.getValue());
         setting->verbose = verbose_arg.getValue();
 
     } catch (ArgException &e) {  // catch any exceptions
@@ -575,9 +578,10 @@ int main(int argc, char **argv) {
     // cout << name_workflow << " ";
     Mils * g = new Mils(emptyProblem, setting->alpha, setting->mutation_probability);
     // Grasp * g = new Grasp(emptyProblem, setting->alpha);
-    double max_time = INT_MAX;
-    // cout << "MAX TIME: " << max_time << endl;
-    // cin.get();
+
+    double max_time = setting->time_limit;
+    cout << "MAX TIME: " << max_time << endl;
+    cin.get();
     clock_t begin = clock();
     g->max_time = max_time;
     Problem * bestSol = g->start();
