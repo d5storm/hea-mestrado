@@ -575,7 +575,7 @@ int main(int argc, char **argv) {
     // cout << name_workflow << " ";
     Mils * g = new Mils(emptyProblem, setting->alpha, setting->mutation_probability);
     // Grasp * g = new Grasp(emptyProblem, setting->alpha);
-    double max_time = 1800.0;
+    double max_time = INT_MAX;
     // cout << "MAX TIME: " << max_time << endl;
     // cin.get();
     clock_t begin = clock();
@@ -584,6 +584,8 @@ int main(int argc, char **argv) {
     clock_t end = clock();
     double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
     double bestSolValue = bestSol->calculateMakespam();
+    bestSol->checkFeasible();
+    // bestSol->print();
     cout << bestSolValue << " " << elapseSecs << endl;
     // exit(1);
     // bestSol->printAlloc();

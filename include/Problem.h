@@ -421,95 +421,86 @@ public:
 		return true;
 	}
 
-	double calculate_swapMachine_effect(int allocPos, Job* job, double newTime, int vmId){
-		vector<double> vmsTime(this->vms.size());
-		vector<double> newFinishTimes(this->jobs.size(), 0.0);
-		// cout << "jobID: " << job->id << " newTime: " << newTime << " vmID: " << vmId << endl;
-		// for(int i = 0; i < newFinishTimes.size(); i++){
-			// cout << "jobID: " << i << " finishTime: " << newFinishTimes[i] << endl;
+	double calculate_swapMachine_effect(int allocPos, Job* job, double newTime, int vmId, vector<double> &newStartTimes, vector<double> &newFinishTimes){
+		// print();
+		// cout << "newTime: " << newTime  << " vmId: " << vmId << endl;
+		
+		for(int a = 0; a < alloc.size(); a++){ // preenchendo inicio e fim original
+			int jobId = alloc[a]->job->id;
+			Machine * vm = alloc[a]->vms;
+			int posOnVm = vm->jobPosOnTimeline(jobId);
+			newStartTimes[jobId] = vm->timelineStartTime[posOnVm];
+			newFinishTimes[jobId] = vm->timelineFinishTime[posOnVm];
+		}
+
+		// for(int i = 0; i < newStartTimes.size(); i++){
+		// 	if(jobs[i]->alocated_vm_id == job->alocated_vm_id)
+		// 		cout << "Id: " << i << " Start: " << newStartTimes[i] << " Finish: " << newFinishTimes[i] << endl;
 		// }
-
-		int lastOnvM = -1;
-		for(int i = 0; i < allocPos; i++){ // carregando tempos antigos
-			// cout << "i: " << i << endl;
-			// cout << "jobID: " << this->alloc[i]->job->id << endl;
-			// cin.get();
-			newFinishTimes[this->alloc[i]->job->id] = this->alloc[i]->vms->timelineFinishTime[this->alloc[i]->vms->jobPosOnTimeline(this->alloc[i]->job->id)];
-			if(this->alloc[i]->vms->id == vmId)
-				lastOnvM = i;
-		}
-		if(lastOnvM < 0)
-			newFinishTimes[job->id] = newTime;
-		else
-			newFinishTimes[job->id] = this->alloc[lastOnvM]->vms->timelineFinishTime[this->alloc[lastOnvM]->vms->jobPosOnTimeline(this->alloc[lastOnvM]->job->id)] + newTime;
-
-		for(int i = 0; i < newFinishTimes.size(); i++){
-			cout << "jobID: " << i << " finishTime: " << newFinishTimes[i] << endl;
-		}
 		// cin.get();
 
-		for(int i = allocPos + 1; i < this->alloc.size(); i++){
-			// cout << "allocSize: " << this->alloc.size() << " alloc: " << i << endl;
-			Job* aux = this->alloc[i]->job;
-			int aux_pos = this->alloc[i]->vms->jobPosOnTimeline(aux->id);
-			// cout << "aux_pos: " << aux_pos << endl;
-			double auxTime = this->alloc[i]->vms->timelineFinishTime[aux_pos] - this->alloc[i]->vms->timelineStartTime[aux_pos];
-			if(this->alloc[i]->vms->id == vmId){
-				// cout << "ei" << endl;
-				newFinishTimes[this->alloc[i]->job->id] = this->alloc[i]->vms->timelineFinishTime[this->alloc[i]->vms->jobPosOnTimeline(this->alloc[i]->job->id)] + newTime;				
-				// newFinishTimes[this->alloc[i]->job->id] = newFinishTimes[aux_pos - 1] + auxTime;
-			} else{
-				// cout << "ou" << endl;
-				//esquerda depois do da direita no conflicts
-
-				//calculando o span na vm
-				double vmSpan = 0.0;
-				
-				if(aux_pos > 0){
-					int accesPos = aux_pos - 1;
-					if(this->alloc[i]->vms->timelineJobs[accesPos]->id == job->id && accesPos - 1 >= 0)
-						accesPos--;
-					vmSpan = newFinishTimes[this->alloc[i]->vms->timelineJobs[accesPos]->id] + auxTime;
-					
-				} else
-					vmSpan = auxTime;
-
-				// cout << "VmSpan: " << vmSpan << endl;
-				// calculando o span por conflitos
-				double conflictSpan = 0.0;
-				for(int j = 0; j < i; j++){
-					Job* conflict = this->alloc[j]->job;
-					if(this->conflicts[aux->id][conflict->id] == 0)
-						continue;
-						
-					double newConflictSpan = newFinishTimes[conflict->id] + auxTime;
-					if (newConflictSpan > conflictSpan)
-						conflictSpan = newConflictSpan; 
+		// procurar latest job na vmId e latest job que tenha conflito 
+		double latestJobVmFinish =  0.0;
+		double latestJobConflictFinish = 0.0;
+		for(int a = 0; a < allocPos; a++){
+			if(conflicts[job->id][alloc[a]->job->id] == 0){ // nao tem conflito
+				if(alloc[a]->vms->id == vmId){ // esta na mesma maquina
+					if(newFinishTimes[alloc[a]->job->id] > latestJobVmFinish) // terminou mais tarde do que o ultimo da mesma vm
+						latestJobVmFinish = newFinishTimes[alloc[a]->job->id];
 				}
+			} else{ // tem conflito
+				if(newFinishTimes[alloc[a]->job->id] > latestJobConflictFinish) // terminou mais tarde do que o ultimo que tenha conflito
+					latestJobConflictFinish = newFinishTimes[alloc[a]->job->id];
+			}
+		}
+		newStartTimes[alloc[allocPos]->job->id] = max(latestJobVmFinish, latestJobConflictFinish); // tempo de comeco
+		newFinishTimes[alloc[allocPos]->job->id] = newStartTimes[alloc[allocPos]->job->id] + newTime; // tempo de fim
 
-				// cout << "conflictSpan: " << conflictSpan << endl;
 
-				if(vmSpan > conflictSpan){
-					newFinishTimes[aux->id] = vmSpan;
-				} else{
-					newFinishTimes[aux->id] = conflictSpan;
+		for(int a = allocPos + 1; a < alloc.size(); a++){ // recalculando start e finish seguindo a ordem de allocation
+			latestJobConflictFinish = 0.0;
+			latestJobVmFinish = 0.0;
+			int aPosOnVm = alloc[a]->vms->jobPosOnTimeline(alloc[a]->job->id);
+
+			double execTime = alloc[a]->vms->timelineFinishTime[aPosOnVm] - alloc[a]->vms->timelineStartTime[aPosOnVm];
+			for(int b = 0; b < a; b++){
+				int bPosOnVm = alloc[b]->vms->jobPosOnTimeline(alloc[b]->job->id);
+				int bVmId = alloc[b]->vms->id;
+				if(b == allocPos){ // eh o modificado
+					bVmId = vmId;
+				} 
+				if(conflicts[alloc[a]->job->id][alloc[b]->job->id] == 0){ // nao tem conflito
+					if(alloc[a]->vms->id == bVmId){ // esta na mesma maquina
+						if(newFinishTimes[alloc[b]->job->id] > latestJobVmFinish) // terminou mais tarde do que o ultimo da mesma vm
+							latestJobVmFinish = newFinishTimes[alloc[b]->job->id];
+					}
+				} else { // tem conflito
+					if(newFinishTimes[alloc[b]->job->id] > latestJobConflictFinish) // terminou mais tarde do que o ultimo que tenha conflito
+						latestJobConflictFinish = newFinishTimes[alloc[b]->job->id];
 				}
 			}
-			// cout << "newFinishTimes[this->alloc[alloc]->job->id]: " << newFinishTimes[this->alloc[i]->job->id] << endl;			
+			newStartTimes[alloc[a]->job->id] = max(latestJobVmFinish, latestJobConflictFinish); // tempo de comeco
+			newFinishTimes[alloc[a]->job->id] = newStartTimes[alloc[a]->job->id] + execTime; // tempo de fim
 		}
 
+
+
+		// for(int i = 0; i < newStartTimes.size(); i++){
+		// 	// if(jobs[i]->alocated_vm_id == job->alocated_vm_id)
+		// 		cout << "Id: " << i << " Start: " << newStartTimes[i] << " Finish: " << newFinishTimes[i] << endl;
+		// }
+		// cin.get();
+
 		double biggestSpan = 0.0;
-		for(int i = 0; i < newFinishTimes.size(); i++){
-			// cout << "jobID: " << i << " finishTime: " << newFinishTimes[i] << endl;
-			if (newFinishTimes[i] > biggestSpan)
+		for(int i = 0; i < newFinishTimes[i]; i++){
+			if(newFinishTimes[i] > biggestSpan)
 				biggestSpan = newFinishTimes[i];
 		}
-		if(job->id == 1)
-			cin.get();
+
 		return biggestSpan;
 	}
 
-	int test_swapMachine(int pos){
+	int test_swapMachine(int pos, vector<double> & newStartTimes, vector<double> &newFinishTimes){
 		
 		Allocation * swap = this->alloc[pos];
 		Job * job = swap->job;
@@ -528,62 +519,22 @@ public:
 		int best_i = -1;
 		for(unsigned int i = 0; i < this->vms.size(); i++){
 			Machine * testVm = this->vms[i];
+			if(testVm->id == originalAllocationMachine->id) continue;
 			double readtime = calculateReadtime(job, testVm->id);
-			// 0.0; // calculando o tempo de leitura de todos os arquivos de input necessarios caso nao estejam alocados na Maquina
-			// for(unsigned int i = 0; i < job->input.size(); i++){
-			// 	int minBandwidthVm = testVm->id;
-
-			// 	if(job->input[i]->is_static){
-			// 		// cout << "Job Is Static!" << endl;
-			// 		bool transferNeed = true;
-			// 		double maxBandwidth = 0.0;
-			// 		int id;
-			// 		for(int j = 0; j < job->input[i]->static_vms.size(); j++){
-			// 			if(testVm->id == job->input[i]->static_vms[j]){
-			// 				transferNeed = false;
-			// 				break;
-			// 			}
-			// 			if(job->input[i]->VMsBandwidth[job->input[i]->static_vms[j]] > maxBandwidth){
-			// 				maxBandwidth = job->input[i]->VMsBandwidth[job->input[i]->static_vms[j]];
-			// 				id = job->input[i]->static_vms[j];
-			// 			}
-			// 		}
-
-			// 		if(job->input[i]->VMsBandwidth[id] < job->input[i]->VMsBandwidth[testVm->id])
-			// 			minBandwidthVm = id;
-			// 		if(transferNeed) readtime += job->input[i]->IOTimeCost[minBandwidthVm];
-			// 	} else{
-			// 		if(job->input[i]->alocated_vm_id == testVm->id)
-			// 			continue;
-			// 		if(job->input[i]->VMsBandwidth[job->input[i]->alocated_vm_id] < job->input[i]->VMsBandwidth[testVm->id])
-			// 			minBandwidthVm = job->input[i]->alocated_vm_id;
-			// 		readtime += job->input[i]->IOTimeCost[minBandwidthVm];			
-			// 	}
-			// }
-
-			// cout << "ReadTime: " << readtime << endl;
-			// cin.get();
 
 			double writetime = calculateWritetime(job, testVm->id, write_vm_id);
-			// 0.0;
-			// if(write_vm_id != -1 && write_vm_id != testVm->id){
-			// 	for(unsigned int i = 0; i < job->output.size(); i++){
-			// 		int minBandwidthVm = testVm->id;
-			// 		if(job->output[i]->VMsBandwidth[write_vm_id] < job->output[i]->VMsBandwidth[testVm->id])
-			// 			minBandwidthVm = job->output[i]->alocated_vm_id;
-			// 		writetime += job->output[i]->IOTimeCost[minBandwidthVm];
-			// 	}
-			// }
-			double processtime = ceil(job->base_time * testVm->slowdown);
 
+			double processtime = ceil(job->base_time * testVm->slowdown);
 
 			double newTime = readtime + processtime + writetime;
 
 			
 			
 			// cout << "Calculating cascade effect" << endl;
-			double newSpan = calculate_swapMachine_effect(pos, job, newTime, testVm->id);
-			cout << "JOBID: " << job->id << " i: " << i << " span: " << newSpan << " originalSpan: " << originalCost<< " readtime: " << readtime << " processtime: " << processtime << " writetime: " << writetime << endl;
+			newFinishTimes = vector<double>(this->jobs.size(), 0.0);
+			newStartTimes = vector<double>(this->jobs.size(), 0.0);
+			double newSpan = calculate_swapMachine_effect(pos, job, newTime, testVm->id, newStartTimes, newFinishTimes);
+			// cout << "JOBID: " << job->id << " i: " << i << " span: " << newSpan << " originalSpan: " << originalCost<< " readtime: " << readtime << " processtime: " << processtime << " writetime: " << writetime << endl;
 
 			// cout << "originalCost: " << originalCost << " newSpan: " << newSpan << " oldExecTime: " << oldExecTime << " newTime: " << newTime << " machinePos: " << i << endl;
 			// cin.get();
@@ -591,11 +542,70 @@ public:
 				// cout << "The new Span is: " << originalCost - oldExecTime + newTime << endl;
 				
 				// cin.get();
-				best_i =  i;
+				return i;
 			}
 		}
 		return best_i;
 
+	}
+
+	double execSwapMachine(int pos, int vmId, vector<double>& newStartTimes, vector<double>& newFinishTimes){
+		Job * changedJob = this->alloc[pos]->job;
+		Machine * changedVm = this->vms[vmId];
+
+		for(int a = 0; a < this->alloc.size(); a++){
+			Job * job = this->alloc[a]->job;
+			Machine * vm = this->alloc[a]->vms;
+			int posOnTimeline = vm->jobPosOnTimeline(job->id);
+
+			if(job->id == changedJob->id){
+				// cout << "Is Changed Job!" << endl;
+				job->alocated_vm_id = vmId;
+				vm->timelineJobs.erase(vm->timelineJobs.begin() + posOnTimeline);
+				vm->timelineStartTime.erase(vm->timelineStartTime.begin() + posOnTimeline);
+				vm->timelineFinishTime.erase(vm->timelineFinishTime.begin() + posOnTimeline);
+				// cout << "Erased" << endl;
+
+				// this->print();
+				// cin.get();
+
+				bool inserted = false;
+
+				// cout << "Changed VM ID: " << changedVm->id << endl;
+				for(int j = 0; j < changedVm->timelineJobs.size(); j++){
+					// cout << "j: " << j << endl;
+					int jId = changedVm->timelineJobs[j]->id;
+					if(newStartTimes[jId] >= newFinishTimes[job->id]){
+						// cout << "Found possition: " << j << endl;
+						changedVm->timelineJobs.insert(changedVm->timelineJobs.begin() + j, job);
+						changedVm->timelineStartTime.insert(changedVm->timelineStartTime.begin() + j, newStartTimes[job->id]);
+						changedVm->timelineFinishTime.insert(changedVm->timelineFinishTime.begin() + j, newFinishTimes[job->id]);
+						inserted=true;
+						break;
+					}
+				}
+				if(!inserted){
+					changedVm->timelineJobs.push_back(job);
+					changedVm->timelineStartTime.push_back(newStartTimes[job->id]);
+					changedVm->timelineFinishTime.push_back(newFinishTimes[job->id]);
+				}
+
+			} else{
+				// cout << "Regular Job" << endl;
+				vm->timelineFinishTime[posOnTimeline] = newFinishTimes[job->id];
+				vm->timelineStartTime[posOnTimeline] = newStartTimes[job->id];
+			}
+		}
+
+		this->alloc[pos]->vms = changedVm;
+
+		// this->calculateMakespam();
+		// this->print();
+
+		// this->checkFeasible();
+		// cin.get();
+
+		return this->calculateMakespam();
 	}
 
 	bool swapMachine(int pos){
@@ -610,6 +620,7 @@ public:
 
 		for(unsigned int i = 0; i < this->vms.size(); i++){
 			
+			if(this->vms[i]->id == originalAllocationMachine->id) continue;
 			for(int j = this->alloc.size() - 1; j >= pos; j--)
 				this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
 
@@ -780,7 +791,7 @@ public:
 		// 	cout << "JobID: " << alloc[i]->job->name << " to MachineID: " << alloc[i]->vms->id << " Writing to MachineID: " << alloc[i]->writeTo << endl;
 		// }
 		for(unsigned int i = 0; i < alloc.size(); i++){
-			cout << alloc[i]->job->name << ", ";
+			cout << alloc[i]->job->id << ", ";
 		}
 		cout << endl;
 	}
@@ -1135,7 +1146,7 @@ public:
 		for(unsigned int i = 0; i < vms.size(); i++){
 			cout << "ID: " << vms[i]->id << " Name:" << vms[i]->name << ": " ;
 			for(unsigned int j = 0; j < vms[i]->timelineJobs.size(); j++){
-				cout << vms[i]->timelineJobs[j]->name << "( " << vms[i]->timelineStartTime[j] << "," << vms[i]->timelineFinishTime[j] << " )" << " ";
+				cout << vms[i]->timelineJobs[j]->id << "( " << vms[i]->timelineStartTime[j] << "," << vms[i]->timelineFinishTime[j] << " )" << " ";
 			}
 			cout << endl;
 		}
@@ -1189,6 +1200,7 @@ public:
 			}
 
 			//checando se topologia foi respeitada
+			Machine * JobMachine = vms[jobs[i]->alocated_vm_id];
 			for(unsigned int j = 0; j < jobs.size();j++){
 				if(conflicts[i][j] == 0)
 					continue;
@@ -1203,7 +1215,6 @@ public:
 				preJobFinishtime = preJobMachine->timelineFinishTime[pos];
 				
 				double jobStartTime = 0.0;
-				Machine * JobMachine = vms[jobs[i]->alocated_vm_id];
 				pos = JobMachine->jobPosOnTimeline(jobs[i]->id);
 				jobStartTime = JobMachine->timelineStartTime[pos];
 				// cout << "Job: " << i << " comecou no tempo: " << jobStartTime << ", mas preJob:" << j << " terminou no tempo: " << preJobFinishtime << endl;
@@ -1213,6 +1224,15 @@ public:
 				}
 
 			}
+			int jobPos = JobMachine->jobPosOnTimeline(jobs[i]->id);
+			if(jobPos > 0){
+				if(JobMachine->timelineFinishTime[jobPos - 1] > JobMachine->timelineStartTime[jobPos]){
+					cout << "Job: " << JobMachine->timelineJobs[jobPos - 1]->id << " terminou depois do Job: " << jobs[i]->id << " Comecar!" << endl;
+					return false;
+				}
+			}
+
+			
 
 		}	
 
