@@ -580,8 +580,8 @@ int main(int argc, char **argv) {
     // Grasp * g = new Grasp(emptyProblem, setting->alpha);
 
     double max_time = setting->time_limit;
-    cout << "MAX TIME: " << max_time << endl;
-    cin.get();
+    // cout << "MAX TIME: " << max_time << endl;
+    // cin.get();
     clock_t begin = clock();
     g->max_time = max_time;
     Problem * bestSol = g->start();

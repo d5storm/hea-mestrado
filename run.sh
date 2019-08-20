@@ -39,7 +39,7 @@ do
 			echo  -ne $file '' & EXEC $execpath -t ${times[$time]} -x 5 -a $a -s $i -c $clusters -w $workflows$file$dag
 			# EXEC $execpath -a $a -s $i -c $clusters -w $workflows$file$dag >> ./results/local_search_testing/"GRASP_new_LS.txt"
 		done
-		time = time + 1			
+		time=$((time+1))			
 	done
 	# echo "Creating .csv ...\n" & EXEC ./results/script ./results/local_search_testing/"GRASP_new_LS.txt" ./results/local_search_testing/"GRASP_new_LS.csv" 10
 done
