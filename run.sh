@@ -28,7 +28,7 @@ for file in "${wkf[@]}"
 do
 	for ((  i = 1 ;  i <= 5;  i++  )) 
 	do
-		echo  -ne $file ' ' & EXEC $execpath -s $i -c $clusters -w $workflows$file$dag
+		echo  -ne $file '' & EXEC $execpath -s $i -c $clusters -w $workflows$file$dag
 					
 	done
 

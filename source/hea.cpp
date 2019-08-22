@@ -27,7 +27,7 @@ struct Settings_struct {
     Settings_struct() {
         // Default Settings
         num_chromosomes = 50;
-        num_generations = 100;
+        num_generations = 10;
         num_elite_set = 25;
 
         mutation_probability = 0.10;
