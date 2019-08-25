@@ -190,7 +190,7 @@ class Mils{
         Problem * startPerturbation(Problem * p, double perturbationPercentage, int * machine, int * write){
             int totalPerturbations = p->alloc.size() * perturbationPercentage;
             for(int i = 0; i < totalPerturbations; i++){
-                int pChooser = rand() % 2;
+                int pChooser = rand() % 3;
                 int pos = rand() % p->alloc.size();
                 if(pChooser == 0){
                     p->perturbateMachine(pos);
@@ -198,6 +198,8 @@ class Mils{
                 } else if(pChooser == 1){
                     p->perturbateWriteTo(pos);
                     *write = *write + 1;
+                } else if(pChooser == 2){
+                    p->perturbateOrder(pos, totalPerturbations);
                 }
             }
 

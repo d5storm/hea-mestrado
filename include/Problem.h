@@ -1268,6 +1268,94 @@ public:
 		return calculateMakespam();
 	}
 
+	bool perturbateOrder(int pos, int max){
+		int end = pos + max;
+		if(end >= this->alloc.size() - 1) end = this->alloc.size() - 1;
+
+		// cout << "Starting PerturbateOrder Pos: " << pos << " max: " << max << endl;
+		// cout << "Cost: " << this->calculateMakespam() << endl;
+		// this->printAlloc();
+		// cin.get();
+
+		vector<Allocation*> shufflePool;
+		vector<Allocation*> tail;
+		for(int i = this->alloc.size() - 1; i >= pos; i--){
+			if(i <= end){
+				shufflePool.push_back(this->alloc[i]);
+			}
+			if(i > end){
+				tail.push_back(this->alloc[i]);
+			}
+			this->alloc[i]->vms->popJob(this->alloc[i]->job->id);
+		}
+		
+		for(int i = this->alloc.size() - 1; i >= pos; i--){
+			this->alloc.pop_back();
+		}
+		
+		// this->printAlloc();
+		// cin.get();
+		
+		// cout << "Shuffle Result" << endl;
+
+		// for(int i = 0; i < shufflePool.size(); i++){
+		// 	cout << shufflePool[i]->job->name << " ";
+		// }
+		// cout << endl;
+
+		random_shuffle(shufflePool.begin(), shufflePool.end());
+
+		// for(int i = 0; i < shufflePool.size(); i++){
+		// 	cout << shufflePool[i]->job->name << " ";
+		// }
+		// cout << endl;
+
+		// cin.get();
+
+		// cout << "Inserting shuffledPool" << endl;
+		while(shufflePool.size() > 0){
+			Allocation * aux = shufflePool.front();
+			shufflePool.erase(shufflePool.begin());
+			bool inserted = aux->vms->pushJob(aux->job, aux->writeTo, getJobConflictMinSpam(aux->job));
+			if(!inserted){
+				shufflePool.push_back(aux);
+			} else {
+				// cout << "Inserted!" << endl;
+				this->alloc.push_back(aux);
+			}
+		}
+
+		// cin.get();
+
+		// cout << "Inserting old Tail" << endl;
+		// cout << "Tail Result:" << endl;
+
+		// for(int i = 0; i < tail.size(); i++){
+		// 	cout << tail[i]->job->name << " ";
+		// }
+		// cout << endl;
+
+
+		while(tail.size() > 0){
+			Allocation * aux = tail.back();
+			tail.pop_back();
+			bool inserted = aux->vms->pushJob(aux->job, aux->writeTo, getJobConflictMinSpam(aux->job));
+			if(!inserted){
+				// cout << "Deu merda" << endl;
+			} else {
+				// cout << "Inserted!" << endl;
+				this->alloc.push_back(aux);
+			}
+		}
+		
+		// cout << "Shuffled!" << endl;
+		// cout << "Cost: " << this->calculateMakespam() << endl;
+		// this->printAlloc();
+		// cin.get();
+
+		// re-add tail jobs maintaining the order
+	}
+
 	bool perturbateWriteTo(int pos){
 		int newVM = rand() % vms.size();
 
