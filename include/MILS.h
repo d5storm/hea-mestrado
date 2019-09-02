@@ -32,6 +32,7 @@ class Mils{
 
         Problem * startLocalSearch(Problem * p, clock_t begin){
             // cout << "Started Local Search" << endl;
+            
             bool improvement = true;
             while(improvement){
                 if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time){ 
@@ -39,8 +40,26 @@ class Mils{
                     return p;
                 }
                 // cout << "LOOP START Cost: " << p->calculateMakespam() << " Elapsed Time: " << double(clock() - begin) / CLOCKS_PER_SEC << endl;
+                // p->print();
+                // cin.get();
                 improvement = false;
                 bool lsImprovement = false;
+                double moveCost = 0.0;
+
+                // moveCost = p->test_swapFileAllocation();
+                // if(moveCost >= 0){
+                //     lsImprovement = true;
+                // }
+                // if(!p->checkFeasible()){
+                //     cout << "booom Swap File Allocation" << endl;
+                //     p->print();
+                //     cin.get();
+                // }
+                // if(lsImprovement){
+                //     improvement = true;
+                //     continue;
+                // }
+
                 for(int i = 0; i < p->alloc.size(); i++){ // RELOCATE LOOP START
                     for (int j = 0; j < p->alloc.size(); j++){
                         if(i == j) continue;
@@ -88,99 +107,49 @@ class Mils{
                     improvement = true;
                     continue;
                 } 
-                // cout << "EXAUSTED RELOCATE! p->cost was: " << p->calculateMakespam() << endl;
-                for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
-                    // Problem * backup = new Problem(*p);
-                    // p->print();
-                    // cout << "*************\n" << endl;
-                    vector<double> newFinishTimes;
-                    vector<double> newStartTimes;
-                    int bestVm = p->test_swapMachine(i, newStartTimes, newFinishTimes);
-                    if(bestVm > 0){
-                        double oldCost = p->calculateMakespam();
-                        double moveCost = p->execSwapMachine(i, bestVm, newStartTimes, newFinishTimes);
-                        // p->print();
-                        lsImprovement = true;
-                        // cout << "Improved Swap Machine: " << moveCost << " Was: " << oldCost << endl;
-                        // cin.get();
-                    }
-                    // cout << "*****" << endl;
-                    // lsImprovement = p->swapMachine(i);
-                    // cout << "improvement: " << lsImprovement << endl;
-                    // cin.get();
-                    if(!p->checkFeasible()){
-                        cout << "booom Swap MAchine" << endl;
-                        p->print();
-                        cin.get();
-                    }
-                    // if(lsImprovement){
-                        // cout << "SWAP IMPROV! Cost: " << p->calculateMakespam()  << endl;
-                        // cin.get();
-                        // delete backup;
-                    //     break;
-                    // } else{
-                    //     delete p;
-                    //     p = backup;
-                    // }
-                } // END SWAP MACHINE LOOP
+                
+                moveCost = p->test_swapMachinePair();
+                if(moveCost >= 0){
+                    lsImprovement = true;
+                }
+                if(!p->checkFeasible()){
+                    cout << "booom Swap Machine Pair" << endl;
+                    p->print();
+                    cin.get();
+                }
+                if(lsImprovement){
+                    improvement = true;
+                    continue;
+                }
+
+                moveCost = p->test_swapMachine();
+                if(moveCost > 0){
+                    lsImprovement = true;
+                }
+
+                if(!p->checkFeasible()){
+                    cout << "booom Swap MAchine" << endl;
+                    p->print();
+                    cin.get();
+                }
 
                 if(lsImprovement){
-                    // cout << "MELHOROU COM A BL2" << endl;
-                    // cin.get();
                     improvement = true;
                     continue;
                 }
-                // cout << "EXAUSTED SWAP MACHINE! p->cost was: " << p->calculateMakespam() << endl;
-                for(int i = 0; i < p->alloc.size(); i++){ // SWAP MACHINE LOOP START
-                    // Problem * backup = new Problem(*p);
-                    // Problem * copy2 = new Problem(*p);
-                    vector<double> newFinishTimes;
-                    vector<double> newStartTimes;
-                    int bestVm = p->test_swapMachineWrite(i, newStartTimes, newFinishTimes);
-                    double moveCost = 0.0;
-                    if(bestVm >= 0){
-                        // backup->print();
-                        moveCost = p->execSwapMachineWrite(i, bestVm, newStartTimes, newFinishTimes);
-                        lsImprovement = true;
-                        // cout << "Cost After Doing Move: " << moveCost;
-                        // p->checkFeasible();
-                    }
-                    // lsImprovement = copy2->swapMachineWrite(i);
-                    // if(bestVm >= 0){
-                    //     cout << " OldMovement Cost: " << copy2->calculateMakespam() << endl;
-                    //     if(moveCost != copy2->calculateMakespam()){
-                    //         p->print();
-                    //         cout << "********" << endl;
-                    //         copy2->print();
-                    //         cout << "********" << endl;
-                    //         p->printAlloc();
-                    //         cout << "********" << endl;
-                    //         copy2->printAlloc();
-                    //         cin.get();
-                    //     }
-                    // }
-                    if(!p->checkFeasible()){
-                        cout << "booom Swap Write" << endl;
-                        cin.get();
-                    }
-                    // if(lsImprovement){
-                    //     delete backup;
-                    //     delete p;
-                    //     p = copy2;
-                    //     break;
-                    // } else{
-                    //     delete p;
-                    //     delete copy2;
-                    //     p = backup;
-                    // }
-                } // END SWAP MACHINE LOOP
-                // cout << "EXAUSTED SWAP Write!" << endl;
-                if(lsImprovement){
-                    // cout << "MELHOROU COM A BL3" << endl;
-                    // cin.get();
-                    improvement = true;
-                    continue;
-                }
+                
+                // moveCost = p->test_swapMachineWrite();
+                // if(moveCost >= 0){
+                //     lsImprovement = true;
+                // }
+                // if(!p->checkFeasible()){
+                //     cout << "booom Swap Write" << endl;
+                //     cin.get();
+                // }
+                // if(lsImprovement){
+                //     improvement = true;
+                //     continue;
+                // }
             }  
             // cout << "LOOP FINISHED" << endl;
             // cin.get();
@@ -190,7 +159,8 @@ class Mils{
         Problem * startPerturbation(Problem * p, double perturbationPercentage, int * machine, int * write){
             int totalPerturbations = p->alloc.size() * perturbationPercentage;
             for(int i = 0; i < totalPerturbations; i++){
-                int pChooser = rand() % 3;
+                int pChooser = rand() % 2;
+                // int pChooser = 0;
                 int pos = rand() % p->alloc.size();
                 if(pChooser == 0){
                     p->perturbateMachine(pos);
@@ -239,10 +209,11 @@ class Mils{
                 // }
                 p = new Problem(*this->blankProblem);
                 p->createSolution(this->alpha);
-                // cin.get();
+                
                 // cout << "Solution created!" << endl;
                 // cout << "Cost: " << p->calculateMakespam() << endl;
-
+                // p->print();
+                // cin.get();
 
                 // p->printAlloc();
                 if(!p->checkFeasible()){
