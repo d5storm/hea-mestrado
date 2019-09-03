@@ -343,7 +343,7 @@ public:
 				return this->execSwapFileAllocation(file, bestId, newStartTimes, newFinishTimes);
 			}
 		}
-		cout << "Nao achou melhora!" << endl;
+		// cout << "Nao achou melhora!" << endl;
 		return -1.0;
 	}
 	double calculate_swapFileAllocation_Effect(Item * file, int writeTo, vector<double>& newStartTimes, vector<double>& newFinishTimes){
@@ -519,8 +519,8 @@ public:
 				Machine * testVm = swap2->vms;
 				double readtime = calculateReadtime(job, testVm->id);
 
-				// double writetime = calculateWritetimeWithChanges(job, testVm->id, allocations);
-				double writetime = calculateWritetime(job, testVm->id, write_vm_id);
+				double writetime = calculateWritetimeWithChanges(job, testVm->id, allocations);
+				// double writetime = calculateWritetime(job, testVm->id, write_vm_id);
 
 				double processtime = ceil(job->base_time * testVm->slowdown);
 
@@ -530,9 +530,9 @@ public:
 				testVm = swap->vms;
 				readtime = calculateReadtime(job2, testVm->id);
 
-				// writetime = calculateWritetimeWithChanges(job2, testVm->id, allocations);
+				writetime = calculateWritetimeWithChanges(job2, testVm->id, allocations);
 
-				writetime = calculateWritetime(job, testVm->id, write_vm_id2);
+				// writetime = calculateWritetime(job, testVm->id, write_vm_id2);
 
 				processtime = ceil(job2->base_time * testVm->slowdown);
 
@@ -865,8 +865,8 @@ public:
 				if(testVm->id == originalAllocationMachine->id) continue;
 				double readtime = calculateReadtime(job, testVm->id);
 
-				// double writetime = calculateWritetimeWithChanges(job, testVm->id, allocations);
-				double writetime = calculateWritetime(job, testVm->id, alloc[pos]->writeTo);
+				double writetime = calculateWritetimeWithChanges(job, testVm->id, allocations);
+				// double writetime = calculateWritetime(job, testVm->id, alloc[pos]->writeTo);
 
 				double processtime = ceil(job->base_time * testVm->slowdown);
 

@@ -46,20 +46,6 @@ class Mils{
                 bool lsImprovement = false;
                 double moveCost = 0.0;
 
-                // moveCost = p->test_swapFileAllocation();
-                // if(moveCost >= 0){
-                //     lsImprovement = true;
-                // }
-                // if(!p->checkFeasible()){
-                //     cout << "booom Swap File Allocation" << endl;
-                //     p->print();
-                //     cin.get();
-                // }
-                // if(lsImprovement){
-                //     improvement = true;
-                //     continue;
-                // }
-
                 for(int i = 0; i < p->alloc.size(); i++){ // RELOCATE LOOP START
                     for (int j = 0; j < p->alloc.size(); j++){
                         if(i == j) continue;
@@ -138,18 +124,32 @@ class Mils{
                     continue;
                 }
                 
-                // moveCost = p->test_swapMachineWrite();
+                // moveCost = p->test_swapFileAllocation();
                 // if(moveCost >= 0){
                 //     lsImprovement = true;
                 // }
                 // if(!p->checkFeasible()){
-                //     cout << "booom Swap Write" << endl;
+                //     cout << "booom Swap File Allocation" << endl;
+                //     p->print();
                 //     cin.get();
                 // }
                 // if(lsImprovement){
                 //     improvement = true;
                 //     continue;
                 // }
+
+                moveCost = p->test_swapMachineWrite();
+                if(moveCost >= 0){
+                    lsImprovement = true;
+                }
+                if(!p->checkFeasible()){
+                    cout << "booom Swap Write" << endl;
+                    cin.get();
+                }
+                if(lsImprovement){
+                    improvement = true;
+                    continue;
+                }
             }  
             // cout << "LOOP FINISHED" << endl;
             // cin.get();
@@ -160,7 +160,7 @@ class Mils{
             int totalPerturbations = p->alloc.size() * perturbationPercentage;
             for(int i = 0; i < totalPerturbations; i++){
                 int pChooser = rand() % 2;
-                // int pChooser = 0;
+                // int pChooser = 2;
                 int pos = rand() % p->alloc.size();
                 if(pChooser == 0){
                     p->perturbateMachine(pos);
@@ -194,12 +194,12 @@ class Mils{
             bool run = true;
             int iter = -1;
             clock_t begin = clock();
-            // while(run){
+            while(run){
             //     iter++;
 
                 // cout << "Current Time: " << double(clock() - begin) / CLOCKS_PER_SEC << endl;
 
-            for(int iter = 0; iter < 10; iter++){
+            // for(int iter = 0; iter < 10; iter++){
                 if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time){ 
                     // cout << grasp_best << " " << ils_best << " ";
                     return bestSolution;

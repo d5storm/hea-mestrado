@@ -589,7 +589,7 @@ int main(int argc, char **argv) {
     double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
     double bestSolValue = bestSol->calculateMakespam();
     bestSol->checkFeasible();
-    bestSol->print();
+    // bestSol->print();
     cout << bestSolValue << " " << elapseSecs << endl;
     // exit(1);
     // bestSol->printAlloc();
