@@ -569,6 +569,42 @@ public:
 		return -1;
 	}
 
+	void fixMachineTimelineOrder(int vmId){
+		Machine * vm = vms[vmId];
+		bool moved = true;
+		// cout << "Before fix!" << endl;
+		// this->print();
+		// cout << "$$$$$$$$$$$$$4" << endl;
+		while(moved){
+			moved = false;
+			for(int j = 1; j < vm->timelineJobs.size(); j++){
+				if(vm->timelineStartTime[j] < vm->timelineFinishTime[j - 1]){ // ordem errada na timeline!
+					moved = true;
+					for(int k = j - 1; k >= 0; k--){
+						if(vm->timelineStartTime[j] >= vm->timelineFinishTime[k]){
+							Job * job = vm->timelineJobs[j];
+							double startTime = vm->timelineStartTime[j];
+							double finishTime = vm->timelineFinishTime[j];
+							vm->timelineJobs.erase(vm->timelineJobs.begin() + j);
+							vm->timelineStartTime.erase(vm->timelineStartTime.begin() + j);
+							vm->timelineFinishTime.erase(vm->timelineFinishTime.begin() + j);
+							
+							vm->timelineJobs.insert(vm->timelineJobs.begin() + k + 1, job);
+							vm->timelineStartTime.insert(vm->timelineStartTime.begin() + k + 1, startTime);
+							vm->timelineFinishTime.insert(vm->timelineFinishTime.begin() + k + 1, finishTime);
+							break;
+						}
+					}
+					break;
+				}
+			}
+			// if(moved){
+			// 	this->print();
+			// 	cin.get();
+			// }
+		}
+	}
+
 	double execSwapMachinePair(int pos, int pos2, vector<double>& newStartTimes, vector<double>& newFinishTimes){
 		Job * changedJob = this->alloc[pos]->job;
 		Machine * changedVm = this->alloc[pos2]->vms;
@@ -653,6 +689,12 @@ public:
 		this->alloc[pos]->vms = changedVm;
 		this->alloc[pos2]->vms = changedVm2;
 
+		// fixing order on each VM
+		// cout << "Fixing order on VMs" << endl;
+		for(int vm = 0; vm < vms.size(); vm++){
+			this->fixMachineTimelineOrder(vm);
+		}
+
 		// this->calculateMakespam();
 		// this->print();
 
@@ -704,18 +746,18 @@ public:
 			if(a == allocPos2){
 				latestJobVmFinish =  0.0;
 				latestJobConflictFinish = 0.0;
-				for(int a = 0; a < allocPos2; a++){
-					if(conflicts[job2->id][alloc[a]->job->id] == 0){ // nao tem conflito
-						int id = alloc[a]->vms->id;
+				for(int b = 0; b < allocPos2; b++){
+					if(conflicts[job2->id][alloc[b]->job->id] == 0){ // nao tem conflito
+						int id = alloc[b]->vms->id;
 						if (a == allocPos) id = vmId;
 						if(id == vmId2){ // esta na mesma maquina
 							// cout << "Mesma Maquina! ID: " << alloc[a]->job->id << endl;
-							if(newFinishTimes[alloc[a]->job->id] > latestJobVmFinish) // terminou mais tarde do que o ultimo da mesma vm
-								latestJobVmFinish = newFinishTimes[alloc[a]->job->id];
+							if(newFinishTimes[alloc[b]->job->id] > latestJobVmFinish) // terminou mais tarde do que o ultimo da mesma vm
+								latestJobVmFinish = newFinishTimes[alloc[b]->job->id];
 						}
 					} else{ // tem conflito
-						if(newFinishTimes[alloc[a]->job->id] > latestJobConflictFinish) // terminou mais tarde do que o ultimo que tenha conflito
-							latestJobConflictFinish = newFinishTimes[alloc[a]->job->id];
+						if(newFinishTimes[alloc[b]->job->id] > latestJobConflictFinish) // terminou mais tarde do que o ultimo que tenha conflito
+							latestJobConflictFinish = newFinishTimes[alloc[b]->job->id];
 					}
 				}
 				newStartTimes[alloc[allocPos2]->job->id] = max(latestJobVmFinish, latestJobConflictFinish); // tempo de comeco
@@ -954,6 +996,9 @@ public:
 
 		this->alloc[pos]->vms = changedVm;
 
+		for(int vm = 0; vm < vms.size(); vm++){
+			this->fixMachineTimelineOrder(vm);
+		}
 		// this->calculateMakespam();
 		// this->print();
 
@@ -1152,6 +1197,9 @@ public:
 
 		this->alloc[pos]->writeTo = vmId;
 
+		for(int vm = 0; vm < vms.size(); vm++){
+			this->fixMachineTimelineOrder(vm);
+		}
 		// this->calculateMakespam();
 		// this->print();
 

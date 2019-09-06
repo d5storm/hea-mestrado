@@ -179,6 +179,7 @@ class Mils{
 
             if(!p->checkFeasible()){
                 cout << "booom Start Perturbation" << endl;
+                p->print();
                 cin.get();
             }
             return p;
