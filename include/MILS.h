@@ -93,7 +93,10 @@ class Mils{
                     improvement = true;
                     continue;
                 } 
-                
+                if(!p->checkFeasible()){
+                                cout << "booom BEFORE Swap Machine Pair" << endl;
+                                cin.get();
+                            }
                 moveCost = p->test_swapMachinePair();
                 if(moveCost >= 0){
                     lsImprovement = true;
@@ -101,6 +104,7 @@ class Mils{
                 if(!p->checkFeasible()){
                     cout << "booom Swap Machine Pair" << endl;
                     p->print();
+                    p->printAlloc();
                     cin.get();
                 }
                 if(lsImprovement){

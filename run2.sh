@@ -15,16 +15,17 @@ function CTRLC {
 }
 
 
-execpath="./bin/HEA"
+execpath="./bin/HEA2"
 clusters="./input/clusters/cluster.vcl"
 workflows="./input/Workflows/"
 dag=".dag"
-declare -a wkf=("CyberShake_30.xml" "CyberShake_50.xml" "CyberShake_100.xml" "GENOME.d.351024866.0.dax" "GENOME.d.702049732.0.dax" "Epigenomics_24.xml" "Epigenomics_46.xml" "Epigenomics_100.xml" "Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
+# declare -a wkf=("CyberShake_30.xml" "CyberShake_50.xml" "CyberShake_100.xml" "GENOME.d.351024866.0.dax" "GENOME.d.702049732.0.dax" "Epigenomics_24.xml" "Epigenomics_46.xml" "Epigenomics_100.xml" "Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
+# declare -a wkf=("Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
 # declare -a times=("73" "212" "1022" "1420" "2245" "2196" "2269" "2661" "30" "2746" "3355" "3382" "3490" "4021")
-declare -a times=("3382" "3490" "4021")
-# declare -a wkf=("Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
+declare -a times=("2746" "3355")
+declare -a wkf=("Montage_50.xml" "Montage_100.xml")
 # declare -a wkf=("miniworkflow")
-declare -a wkf=("Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
+# declare -a wkf=("Montage_25.xml" "Montage_50.xml" "Montage_100.xml" "Inspiral_30.xml" "Inspiral_50.xml" "Inspiral_100.xml")
 # declare -a wkf=("CYBERSHAKE.n.200.19.dax" "CYBERSHAKE.n.300.19.dax" "CYBERSHAKE.n.400.0.dax" "CYBERSHAKE.n.500.19.dax")
 # declare -a wkf=("MONTAGE.n.200.0.dax" "MONTAGE.n.300.0.dax" "SIPHT.n.300.0.dax" "SIPHT.n.400.0.dax" "GENOME.n.300.19.dax" "GENOME.n.400.19.dax")
 trap CTRLC SIGINT

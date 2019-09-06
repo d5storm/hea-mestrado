@@ -508,6 +508,7 @@ public:
 				Job * job2 = swap2->job;
 				Machine * originalAllocationMachine2 = swap2->vms;
 
+				if(originalAllocationMachine2->id == originalAllocationMachine->id) continue;
 				// cout << "JobID: " << job->id << " Job2ID: " << job2->id << endl;
 
 				int posOnTimeline2 = originalAllocationMachine2->jobPosOnTimeline(job2->id);
@@ -541,7 +542,6 @@ public:
 
 				newFinishTimes = vector<double>(this->jobs.size(), 0.0);
 				newStartTimes = vector<double>(this->jobs.size(), 0.0);
-				// int allocPos, int allocPos2, Job* job, Job* job2, double newTime, double newTime2, vector<double> &newStartTimes, vector<double> &newFinishTimes
 				double newSpan = calculate_swapMachinePair_effect(pos, pos2, job, job2, newTime, newTime2, newStartTimes, newFinishTimes);
 				// cout << "JOBID: " << job->id << " i: " << i << " span: " << newSpan << " originalSpan: " << originalCost<< " readtime: " << readtime << " processtime: " << processtime << " writetime: " << writetime << endl;
 
@@ -551,7 +551,17 @@ public:
 					// cout << "The new Span is: " << originalCost - oldExecTime + newTime << endl;
 					
 					// cin.get();
+					// this->print();
+					// this->printAlloc();
+					// cout << "#################" << endl;
+					// cout << "JobID: " << job->id << " Job2ID: " << job2->id << endl;
+					
 					return this->execSwapMachinePair(pos, pos2, newStartTimes, newFinishTimes);
+					// if(job->id == 8 && job2->id == 13 || job2->id == 8 && job->id == 13) {
+					// 	this->print();
+					// 	this->printAlloc();
+					// 	cin.get();
+					// }
 				}
 				
 			}
@@ -1603,9 +1613,9 @@ public:
 			cout << endl;
 		}
 
-		for(unsigned int i = 0; i < files.size(); i++){
-			cout << "file: " << files[i]->id << " VM: " << files[i]->alocated_vm_id << endl;
-		}
+		// for(unsigned int i = 0; i < files.size(); i++){
+		// 	cout << "file: " << files[i]->id << " VM: " << files[i]->alocated_vm_id << endl;
+		// }
 	}
 
 	double calculateMakespam(){

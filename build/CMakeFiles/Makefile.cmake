@@ -42,5 +42,5 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/HEA.dir/DependInfo.cmake"
+  "CMakeFiles/HEA2.dir/DependInfo.cmake"
   )
