@@ -46,6 +46,23 @@ class Mils{
                 bool lsImprovement = false;
                 double moveCost = 0.0;
 
+                moveCost = p->test_swapFileAllocation();
+                if(moveCost >= 0){
+                    lsImprovement = true;
+                    // cout << "MEELHOROU COM A NOVA BL!: " << moveCost << endl;
+                    // p->print();
+                    // cin.get();
+                }
+                if(!p->checkFeasible()){
+                    cout << "booom Swap File Allocation" << endl;
+                    p->print();
+                    cin.get();
+                }
+                if(lsImprovement){
+                    improvement = true;
+                    continue;
+                }
+
                 for(int i = 0; i < p->alloc.size(); i++){ // RELOCATE LOOP START
                     for (int j = 0; j < p->alloc.size(); j++){
                         if(i == j) continue;
@@ -127,33 +144,20 @@ class Mils{
                     improvement = true;
                     continue;
                 }
-                
-                // moveCost = p->test_swapFileAllocation();
+                                
+
+                // moveCost = p->test_swapMachineWrite();
                 // if(moveCost >= 0){
                 //     lsImprovement = true;
                 // }
                 // if(!p->checkFeasible()){
-                //     cout << "booom Swap File Allocation" << endl;
-                //     p->print();
+                //     cout << "booom Swap Write" << endl;
                 //     cin.get();
                 // }
                 // if(lsImprovement){
                 //     improvement = true;
                 //     continue;
                 // }
-
-                moveCost = p->test_swapMachineWrite();
-                if(moveCost >= 0){
-                    lsImprovement = true;
-                }
-                if(!p->checkFeasible()){
-                    cout << "booom Swap Write" << endl;
-                    cin.get();
-                }
-                if(lsImprovement){
-                    improvement = true;
-                    continue;
-                }
             }  
             // cout << "LOOP FINISHED" << endl;
             // cin.get();

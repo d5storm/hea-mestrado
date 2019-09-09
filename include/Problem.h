@@ -167,6 +167,94 @@ public:
 		return this->makespam; 
 	}
 
+	bool popJobKeepAllocation(int jobId){
+		for(unsigned int i = 0; i < timelineJobs.size(); i++){
+			if (timelineJobs[i]->id == jobId){
+				timelineJobs[i]->alocated = false;
+				// for(unsigned int f = 0; f < timelineJobs[i]->output.size(); f++){
+				// 	timelineJobs[i]->output[f]->alocated_vm_id = -1;
+				// }
+				// if(timelineJobs[i]->rootJob){
+				// 	for(unsigned int f = 0; f < timelineJobs[i]->input.size(); f++){
+				// 		if(timelineJobs[i]->input[f]->is_static)
+				// 			timelineJobs[i]->input[f]->alocated_vm_id = -1;
+				// 	}	
+				// }
+				timelineJobs.erase(timelineJobs.begin() + i);
+				timelineStartTime.erase(timelineStartTime.begin() + i);
+				timelineFinishTime.erase(timelineFinishTime.begin() + i);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool pushJobKeepAllocation(Job * job, int write_vm_id, double minSpam, vector<int> allocations){
+		for(unsigned int i = 0; i < job->input.size(); i++){ // checando se todos os arquivos de input que nao sao estaticos ja foram produzidos
+			// cout << "inputFileID: " << job->input[i]->id << " isStatic: " << job->input[i]->is_static << endl;
+			if(job->input[i]->is_static == false && job->input[i]->alocated_vm_id < 0){
+				// cout << "JOB NOT AVAILABLE: FILES NOT READY" << endl; 
+				return false;
+			}
+		}
+
+
+		double startTime; // calculando tempo de inicio.
+		if (timelineJobs.size() == 0)
+			startTime = 0.0;
+		else
+			startTime = (timelineFinishTime[timelineFinishTime.size() - 1]);
+
+		if(startTime < minSpam)
+			startTime = minSpam;
+
+		// cout << "StartTime: " << startTime << endl;
+		// cin.get();
+		
+		
+		
+		double readtime = calculateReadtime(job, this->id);
+
+		// cout << "ReadTime: " << readtime << endl;
+		// cin.get();
+
+		
+		double writetime = calculateWritetimeWithChanges(job, this->id, allocations);
+
+		double processtime = ceil(job->base_time * this->slowdown);
+		double finishTime = readtime + writetime + processtime + startTime;
+
+		// if(job->id == 0)
+			// cout  << "JobId: " << job->id << " readtime: " << readtime << " processtime: " << processtime << " writetime: " << writetime << endl;
+		// if(job->name == "ID00002"){
+		// 	cout << "ProcessMachineID: " <<this->id << " ProcessMAchineName: " << this->name << " writeID: " << write_vm_id << " minSpam: " << minSpam << endl;
+		// 	cout << "start: " << startTime << " read: " << readtime << " process: " << processtime << " write: " << writetime << " fulltime: " << finishTime << endl;
+		// 	cin.get();
+		// }
+
+		timelineStartTime.push_back(startTime);
+		timelineFinishTime.push_back(finishTime);
+		timelineJobs.push_back(job);
+
+		job->alocated = true;
+		job->alocated_vm_id = this->id;
+		for(unsigned int i = 0; i < job->output.size(); i++){
+			int final_vm = this->id;
+			if(write_vm_id != -1)
+				final_vm = write_vm_id;
+			// job->output[i]->alocated_vm_id = final_vm;
+		}
+
+		for(unsigned int i = 0; i < job->input.size(); i++){
+			if(job->input[i]->is_static){
+				if(job->input[i]->alocated_vm_id < 0)
+					job->input[i]->alocated_vm_id = this->id;
+			}
+		}
+
+		return true;
+	}
+
 	bool popJob(int jobId){
 		for(unsigned int i = 0; i < timelineJobs.size(); i++){
 			if (timelineJobs[i]->id == jobId){
@@ -309,12 +397,15 @@ public:
 	double test_swapFileAllocation(){
 		vector<double> newFinishTimes;
 		vector<double> newStartTimes;
+		vector<double> BestnewFinishTimes;
+		vector<double> BestnewStartTimes;
+		double originalCost = this->calculateMakespam();
+
 		for(int f = 0; f < this->files.size(); f++){
 			Item * file = files[f];
 			// cout << "File: " << file->id << " is_Static: " << file->is_static << endl;
 			if(file->is_static) continue;
 
-			double originalCost = this->calculateMakespam();
 			double bestMove = originalCost;
 			int bestId = -1;
 			for(unsigned int i = 0; i < this->vms.size(); i++){
@@ -337,10 +428,13 @@ public:
 					// cin.get();
 					bestMove = newSpan;
 					bestId = testVm->id;
+					BestnewFinishTimes = newFinishTimes;
+					BestnewStartTimes = newStartTimes;
 				}
 			}
 			if(bestId >= 0){
-				return this->execSwapFileAllocation(file, bestId, newStartTimes, newFinishTimes);
+				// cin.get();
+				return this->execSwapFileAllocation(file, bestId, BestnewStartTimes, BestnewFinishTimes);
 			}
 		}
 		// cout << "Nao achou melhora!" << endl;
@@ -376,10 +470,11 @@ public:
 			latestJobConflictFinish = 0.0;
 			latestJobVmFinish = 0.0;
 			int aPosOnVm = alloc[a]->vms->jobPosOnTimeline(alloc[a]->job->id);
-			double oldWriteTime = calculateWritetimeWithChanges(alloc[a]->job, alloc[a]->vms->id, oldAlocations);
-			double oldReadTime = calculateReadtime(alloc[a]->job, alloc[a]->vms->id);
-			double execTime = alloc[a]->vms->timelineFinishTime[aPosOnVm] - alloc[a]->vms->timelineStartTime[aPosOnVm] - oldReadTime - oldWriteTime;			
-			
+			// double oldWriteTime = calculateWritetimeWithChanges(alloc[a]->job, alloc[a]->vms->id, oldAlocations);
+			// double oldReadTime = calculateReadtime(alloc[a]->job, alloc[a]->vms->id);
+			// double execTime = alloc[a]->vms->timelineFinishTime[aPosOnVm] - alloc[a]->vms->timelineStartTime[aPosOnVm] - oldReadTime - oldWriteTime;
+			double execTime = ceil(alloc[a]->vms->slowdown * alloc[a]->job->base_time);
+			// cout << "********* calculated execTime: " << execTime << endl;
 			double readTime = 0.0;
 
 			for(int f = 0; f < alloc[a]->job->input.size(); f++){
@@ -445,7 +540,7 @@ public:
 		}
 
 
-
+		// cout << "times after recalculation" << endl;
 		// for(int i = 0; i < newStartTimes.size(); i++){
 		// 	// if(jobs[i]->alocated_vm_id == job->alocated_vm_id)
 		// 		cout << "Id: " << i << " Start: " << newStartTimes[i] << " Finish: " << newFinishTimes[i] << endl;
@@ -475,6 +570,10 @@ public:
 		// cout << "^^^^" << endl;
 		// this->print();
 		// cin.get();
+
+		for(int vm = 0; vm < vms.size(); vm++){
+			this->fixMachineTimelineOrder(vm);
+		}
 
 		return this->calculateMakespam();
 	}
@@ -613,7 +712,7 @@ public:
 				}
 			}
 			if(moved){
-				this->print();
+				// this->print();
 				// cin.get();
 			}
 		}
@@ -1256,6 +1355,12 @@ public:
 		// cout << "********" << endl;
 		this->alloc.erase(this->alloc.begin() + pos1);
 
+		vector<int> allocations = vector<int>(files.size(), -1);
+		for(int f = 0; f < files.size(); f++){
+			int id = files[f]->alocated_vm_id;
+			allocations[files[f]->id] = id;
+		}
+
 		bool tryMove = true;
 		if(pos1 > pos2){
 			for(unsigned int j = pos2; j < this->alloc.size(); j++){ // vendo se topologia é respeitada para a direita
@@ -1287,7 +1392,8 @@ public:
 		// cout << "PosRemove: " << pos << " PosInsert: " << insertionPos << endl;
 		bool teste = true;
 		for(int j = this->alloc.size() - 1; j >= pos1; j--){
-			teste = this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
+			// teste = this->alloc[j]->vms->popJob(this->alloc[j]->job->id);
+			teste = this->alloc[j]->vms->popJobKeepAllocation(this->alloc[j]->job->id);
 			if(!teste){
 				cout << "NAO CONSEGUIU POP!" << endl;
 				cin.get();
@@ -1296,7 +1402,8 @@ public:
 
 		for(unsigned int j = pos1; j < this->alloc.size(); j++){
 			double minSpam = this->getJobConflictMinSpam(this->alloc[j]->job);
-			this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
+			// this->alloc[j]->vms->pushJob(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam);
+			this->alloc[j]->vms->pushJobKeepAllocation(this->alloc[j]->job, this->alloc[j]->writeTo, minSpam, allocations);
 		}
 
 		// this->printAlloc();
@@ -1610,9 +1717,19 @@ public:
 		
 		Machine * testVm = this->vms[newVM];
 		
+		vector<int> newAlocations = vector<int>(files.size(), -1);
+		for(int f = 0; f < files.size(); f++){
+			int id = files[f]->alocated_vm_id;
+			newAlocations[files[f]->id] = id;
+		}
+
+		for(int f = 0; f < job->output.size(); f++){
+			newAlocations[job->output[f]->id] = testVm->id;
+		}
+
 		double readtime = calculateReadtime(job, alloc[pos]->vms->id);
 
-		double writetime = calculateWritetime(job, alloc[pos]->vms->id, testVm->id);
+		double writetime = calculateWritetimeWithChanges(job, alloc[pos]->vms->id, newAlocations);
 
 		double processtime = ceil(job->base_time * alloc[pos]->vms->slowdown);
 
