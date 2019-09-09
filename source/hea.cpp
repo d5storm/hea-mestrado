@@ -590,7 +590,7 @@ int main(int argc, char **argv) {
     double bestSolValue = bestSol->calculateMakespam();
     bestSol->checkFeasible();
     // bestSol->print();
-    cout << bestSolValue << " " << elapseSecs << endl;
+    cout << bestSolValue / 60.0 << " " << elapseSecs << endl;
     // exit(1);
     // bestSol->printAlloc();
     // bestSol->print();
