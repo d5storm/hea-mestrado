@@ -94,9 +94,9 @@ class Mils{
                     continue;
                 } 
                 if(!p->checkFeasible()){
-                                cout << "booom BEFORE Swap Machine Pair" << endl;
-                                cin.get();
-                            }
+                    cout << "booom BEFORE Swap Machine Pair" << endl;
+                    cin.get();
+                }
                 moveCost = p->test_swapMachinePair();
                 if(moveCost >= 0){
                     lsImprovement = true;
@@ -186,7 +186,7 @@ class Mils{
         }
 
         Problem * start(){
-            // cout << "Begin: " << begin << " max_time: " << max_time << endl;
+            // cout << "max_time: " << max_time << endl;
             Problem * p = new Problem(*this->blankProblem);           
             double bestSolValue = 9999999999.0;
             Problem * bestSolution = new Problem(*this->blankProblem);
@@ -200,7 +200,7 @@ class Mils{
             int iter = -1;
             clock_t begin = clock();
             while(run){
-            //     iter++;
+                iter++;
 
                 // cout << "Current Time: " << double(clock() - begin) / CLOCKS_PER_SEC << endl;
 

@@ -571,37 +571,51 @@ public:
 
 	void fixMachineTimelineOrder(int vmId){
 		Machine * vm = vms[vmId];
+		int moves = 9999;
 		bool moved = true;
 		// cout << "Before fix!" << endl;
 		// this->print();
 		// cout << "$$$$$$$$$$$$$4" << endl;
 		while(moved){
+			if(moves < 0){
+				cout << "LOOP" << endl;
+			}
 			moved = false;
 			for(int j = 1; j < vm->timelineJobs.size(); j++){
 				if(vm->timelineStartTime[j] < vm->timelineFinishTime[j - 1]){ // ordem errada na timeline!
+					moves--;
 					moved = true;
-					for(int k = j - 1; k >= 0; k--){
-						if(vm->timelineStartTime[j] >= vm->timelineFinishTime[k]){
-							Job * job = vm->timelineJobs[j];
-							double startTime = vm->timelineStartTime[j];
-							double finishTime = vm->timelineFinishTime[j];
-							vm->timelineJobs.erase(vm->timelineJobs.begin() + j);
-							vm->timelineStartTime.erase(vm->timelineStartTime.begin() + j);
-							vm->timelineFinishTime.erase(vm->timelineFinishTime.begin() + j);
-							
-							vm->timelineJobs.insert(vm->timelineJobs.begin() + k + 1, job);
-							vm->timelineStartTime.insert(vm->timelineStartTime.begin() + k + 1, startTime);
-							vm->timelineFinishTime.insert(vm->timelineFinishTime.begin() + k + 1, finishTime);
+					Job * job = vm->timelineJobs[j];
+					double startTime = vm->timelineStartTime[j];
+					double finishTime = vm->timelineFinishTime[j];
+					
+					// cout << "Ordem Errada!" << endl;
+
+					vm->timelineJobs.erase(vm->timelineJobs.begin() + j);
+					vm->timelineStartTime.erase(vm->timelineStartTime.begin() + j);
+					vm->timelineFinishTime.erase(vm->timelineFinishTime.begin() + j);
+					bool found = false;
+					for(int k = 0; k < vm->timelineJobs.size(); k++){
+						if(vm->timelineStartTime[k] >= finishTime){
+							found = true;
+							vm->timelineJobs.insert(vm->timelineJobs.begin() + k, job);
+							vm->timelineStartTime.insert(vm->timelineStartTime.begin() + k, startTime);
+							vm->timelineFinishTime.insert(vm->timelineFinishTime.begin() + k, finishTime);
 							break;
 						}
+					}
+					if (!found){
+						vm->timelineJobs.push_back(job);
+						vm->timelineStartTime.push_back(startTime);
+						vm->timelineFinishTime.push_back(finishTime);
 					}
 					break;
 				}
 			}
-			// if(moved){
-			// 	this->print();
-			// 	cin.get();
-			// }
+			if(moved){
+				this->print();
+				// cin.get();
+			}
 		}
 	}
 
