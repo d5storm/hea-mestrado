@@ -62,58 +62,74 @@ class Mils{
                     improvement = true;
                     continue;
                 }
-
-                for(int i = 0; i < p->alloc.size(); i++){ // RELOCATE LOOP START
-                    for (int j = 0; j < p->alloc.size(); j++){
-                        if(i == j) continue;
-                        Problem * backup = new Problem(*p);
-                        if(!p->checkFeasible()){
-                                cout << "booom BEFORE Relocate" << endl;
-                                cin.get();
-                            }
-                        bool done = p->realocate(i, j);
-                        // delete backup;
-                        // bool done = false;
-                        if(done){
-                            
-                            if(!p->checkFeasible()){
-                                cout << "booom Relocate" << endl;
-                                backup->print();
-                                cin.get();
-                            }
-                            double solValue = p->calculateMakespam();
-                            // cout << "A Move was Done! i: " << i << " j: " << j << endl;
-                            // cout << "oldValue: " << backup->calculateMakespam() << " newValue: " << solValue << endl;
-                            // cin.get();
-                            if(solValue >= backup->calculateMakespam()){
-                                delete p;
-                                p = backup;
-                            } else{
-                                // cout << "RELOCATE IMPROV! Cost: " << p->calculateMakespam()  << endl;
-                                // cin.get();
-                                delete backup;
-                                lsImprovement = true;
-                                break;
-                            }                                
-                        } else{
-                            delete backup;
-                        }
-                    }
-                    if(lsImprovement){
-                        break;
-                    }
-                } // RELOCATE LOOP END
-
-                if(lsImprovement){
-                    // cout << "MELHOROU COM A BL1" << endl;
+                moveCost = p->test_reallocate();
+                if(moveCost >= 0){
+                    lsImprovement = true;
+                    // cout << "MEELHOROU COM A NOVA BL!: " << moveCost << endl;
+                    // p->print();
                     // cin.get();
-                    improvement = true;
-                    continue;
-                } 
+                }
                 if(!p->checkFeasible()){
-                    cout << "booom BEFORE Swap Machine Pair" << endl;
+                    cout << "booom Relocate!" << endl;
+                    p->print();
                     cin.get();
                 }
+                if(lsImprovement){
+                    improvement = true;
+                    continue;
+                }
+                // for(int i = 0; i < p->alloc.size(); i++){ // RELOCATE LOOP START
+                //     for (int j = 0; j < p->alloc.size(); j++){
+                //         if(i == j) continue;
+                //         Problem * backup = new Problem(*p);
+                //         if(!p->checkFeasible()){
+                //                 cout << "booom BEFORE Relocate" << endl;
+                //                 cin.get();
+                //             }
+                //         bool done = p->realocate(i, j);
+                //         // delete backup;
+                //         // bool done = false;
+                //         if(done){
+                            
+                //             if(!p->checkFeasible()){
+                //                 cout << "booom Relocate" << endl;
+                //                 backup->print();
+                //                 cin.get();
+                //             }
+                //             double solValue = p->calculateMakespam();
+                //             // cout << "A Move was Done! i: " << i << " j: " << j << endl;
+                //             // cout << "oldValue: " << backup->calculateMakespam() << " newValue: " << solValue << endl;
+                //             // cin.get();
+                //             if(solValue >= backup->calculateMakespam()){
+                //                 delete p;
+                //                 p = backup;
+                //             } else{
+                //                 // cout << "RELOCATE IMPROV! Cost: " << p->calculateMakespam()  << endl;
+                //                 // cout << "A Move was Done! i: " << i << " j: " << j << endl;
+                //                 // cin.get();
+                //                 delete backup;
+                //                 lsImprovement = true;
+                //                 break;
+                //             }                                
+                //         } else{
+                //             delete backup;
+                //         }
+                //     }
+                //     if(lsImprovement){
+                //         break;
+                //     }
+                // } // RELOCATE LOOP END
+                // // cin.get();
+                // if(lsImprovement){
+                //     // cout << "MELHOROU COM A BL1" << endl;
+                //     // cin.get();
+                //     improvement = true;
+                //     continue;
+                // } 
+                // if(!p->checkFeasible()){
+                //     cout << "booom BEFORE Swap Machine Pair" << endl;
+                //     cin.get();
+                // }
                 moveCost = p->test_swapMachinePair();
                 if(moveCost >= 0){
                     lsImprovement = true;
@@ -203,12 +219,12 @@ class Mils{
             bool run = true;
             int iter = -1;
             clock_t begin = clock();
-            while(run){
-                iter++;
+            // while(run){
+            //     iter++;
 
                 // cout << "Current Time: " << double(clock() - begin) / CLOCKS_PER_SEC << endl;
 
-            // for(int iter = 0; iter < 10; iter++){
+            for(int iter = 0; iter < 10; iter++){
                 if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time){ 
                     // cout << grasp_best << " " << ils_best << " ";
                     return bestSolution;
@@ -229,8 +245,9 @@ class Mils{
                     cout << "booom create Sol" << endl;
                     cin.get();
                 }
+                // cout << "Starting first LS!" << endl;
                 p = startLocalSearch(p, begin);
-                
+                // cout << "Finished first LS!" << endl;
                 if (p->calculateMakespam() < bestSolValue){
                     delete bestSolution;
                     bestSolution = new Problem(*p);

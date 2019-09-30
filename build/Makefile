@@ -111,17 +111,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named HEA2
+# Target rules for targets named HEA
 
 # Build rule for target.
-HEA2: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 HEA2
-.PHONY : HEA2
+HEA: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 HEA
+.PHONY : HEA
 
 # fast build rule for target.
-HEA2/fast:
-	$(MAKE) -f CMakeFiles/HEA2.dir/build.make CMakeFiles/HEA2.dir/build
-.PHONY : HEA2/fast
+HEA/fast:
+	$(MAKE) -f CMakeFiles/HEA.dir/build.make CMakeFiles/HEA.dir/build
+.PHONY : HEA/fast
 
 source/hea.o: source/hea.cpp.o
 
@@ -129,7 +129,7 @@ source/hea.o: source/hea.cpp.o
 
 # target to build an object file
 source/hea.cpp.o:
-	$(MAKE) -f CMakeFiles/HEA2.dir/build.make CMakeFiles/HEA2.dir/source/hea.cpp.o
+	$(MAKE) -f CMakeFiles/HEA.dir/build.make CMakeFiles/HEA.dir/source/hea.cpp.o
 .PHONY : source/hea.cpp.o
 
 source/hea.i: source/hea.cpp.i
@@ -138,7 +138,7 @@ source/hea.i: source/hea.cpp.i
 
 # target to preprocess a source file
 source/hea.cpp.i:
-	$(MAKE) -f CMakeFiles/HEA2.dir/build.make CMakeFiles/HEA2.dir/source/hea.cpp.i
+	$(MAKE) -f CMakeFiles/HEA.dir/build.make CMakeFiles/HEA.dir/source/hea.cpp.i
 .PHONY : source/hea.cpp.i
 
 source/hea.s: source/hea.cpp.s
@@ -147,7 +147,7 @@ source/hea.s: source/hea.cpp.s
 
 # target to generate assembly for a file
 source/hea.cpp.s:
-	$(MAKE) -f CMakeFiles/HEA2.dir/build.make CMakeFiles/HEA2.dir/source/hea.cpp.s
+	$(MAKE) -f CMakeFiles/HEA.dir/build.make CMakeFiles/HEA.dir/source/hea.cpp.s
 .PHONY : source/hea.cpp.s
 
 # Help Target
@@ -157,7 +157,7 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... HEA2"
+	@echo "... HEA"
 	@echo "... edit_cache"
 	@echo "... source/hea.o"
 	@echo "... source/hea.i"
