@@ -3,8 +3,6 @@
 
 #include <sstream>
 #include <cstdlib>
-#include "util.h"
-#include "uPRCP.h"
 
 // Forward declaration
 struct Solucao;
