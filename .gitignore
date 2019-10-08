@@ -1,2 +1,5 @@
 CMakeLists.txt
 build/Makefile
+bin/HEA
+run.sh
+run2.sh

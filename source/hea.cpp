@@ -48,6 +48,7 @@ struct Settings_struct {
         howMany_elistism = (int) ceil(num_chromosomes * elitism_rate);
 
         lambda = 0.000;
+        seed = 1;
     }
 };
 
@@ -585,7 +586,7 @@ int main(int argc, char **argv) {
     // cin.get();
     clock_t begin = clock();
     g->max_time = max_time;
-    Problem * bestSol = g->start();
+    Problem * bestSol = g->startDM();
     clock_t end = clock();
     double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
     double bestSolValue = bestSol->calculateMakespam();

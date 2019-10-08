@@ -365,7 +365,7 @@ int main(int argc, char **argv)
 // Gabriel - altera��o 30/06/2008	- in�cio 	
         buffer.str("");		
 //		buffer << "c:\\ProjetoFinal\\popstar2002\\debug\\fim_maximal " << argv[3] << " " << s << " " << ARQ_TMP << argv[2] << ".txt";
-		buffer << "../miner/fim_maximal " << argv[3] << " " << s << " " << ARQ_TMP << argv[2] << ".txt";
+		buffer << "source/miner/fim_maximal " << argv[3] << " " << s << " " << ARQ_TMP << argv[2] << ".txt";
 		int res = system(buffer.str().c_str());
 		
 		if(res){}

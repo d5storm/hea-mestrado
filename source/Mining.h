@@ -3,19 +3,34 @@
 
 #include <sstream>
 #include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+using namespace std;
 
 // Forward declaration
-struct Solucao;
+// Data Structure for DM operations
+class Solucao{
+	public:
+		vector<int> transaction;
+		double cost;
+		Solucao(){cost =0;};
+		~Solucao(){};
+		Solucao &operator=(const Solucao &outro) {
+			transaction = outro.transaction;
+			cost = outro.cost;
+			return *this;
+		};
+};
 
-extern int numPts;
-extern int numPosCand;
 
 class Mining{
 	// Forward declaration
 	class Pattern;
 
 	private:	
-		int nPatterns,sizeES,maxSizeES, min_sup, min_sup_orig, worstCostPos, currentPattern, gamma;
+		int nPatterns,sizeES,maxSizeES, min_sup, min_sup_orig, worstCostPos, currentPattern, gamma,nJobs;
 		double worstCostES;
 		Pattern** listOfPatterns;		// Lista de padroes minerados pelo FPmax
 		Solucao** ES;    		// lista das melhores solucoes
@@ -24,18 +39,15 @@ class Mining{
 		
 		class Pattern{
 			public:	
-				int* elements, *usage;	// 
+				vector<pair<int,int>> elements;	//
 				int support,size;
-				Pattern(){ elements = new int[numPts]; usage = new int[numPts]; support = 0; size = 0;};
-				~Pattern(){delete[] elements; delete[] usage;}; 
+				Pattern(){  elements = std::vector<pair<int,int>>(); support = 0; size = 0;};
+				~Pattern(){ elements.clear();};
 				// Assignment operator overload 
 				Pattern &operator=(const Pattern &other) {
 					support = other.support;
 					size = other.size;
-					for(int i=0;i<numPts;i++){
-						elements[i] = other.elements[i];
-						usage[i] = other.usage[i];
-					}
+					elements = other.elements;
 					return *this;
 				}
 		};
@@ -52,7 +64,7 @@ class Mining{
 		
 		///// Manipula Conjunto Elite
 		void printES();
-		bool updateES(Solucao *&s);
+		bool updateES(Solucao* s);
 		int getSizeCE(){ return sizeES;};
 		bool isStableES() { return itersWithoutChange() >= gamma;};
 		double getWorstCostES() { return worstCostES;};
