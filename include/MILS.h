@@ -1,5 +1,5 @@
 #ifndef MILS_H
-#define MILS_h
+#define MILS_H
 
 
 #include <string>
@@ -46,7 +46,7 @@ public:
 			improvement = false;
 			bool lsImprovement = false;
 			double moveCost = 0.0;
-
+		// cout << "FileAlloc" << endl;
 			moveCost = p->test_swapFileAllocation();
 			if(moveCost >= 0){
 				lsImprovement = true;
@@ -63,7 +63,10 @@ public:
 				improvement = true;
 				continue;
 			}
+			// cout << "Realloc" << endl;
+			// p->print();
 			moveCost = p->test_reallocate();
+			// p->print();
 			if(moveCost >= 0){
 				lsImprovement = true;
 				// cout << "MEELHOROU COM A NOVA BL!: " << moveCost << endl;
@@ -131,7 +134,11 @@ public:
 			//     cout << "booom BEFORE Swap Machine Pair" << endl;
 			//     cin.get();
 			// }
+
+			// cout << "machinePair" << endl;
+			// p->print();
 			moveCost = p->test_swapMachinePair();
+			// p->print();
 			if(moveCost >= 0){
 				lsImprovement = true;
 			}
@@ -146,7 +153,10 @@ public:
 				continue;
 			}
 
+			// cout << "machine" << endl;
+			// p->print();
 			moveCost = p->test_swapMachine();
+			// p->print();
 			if(moveCost > 0){
 				lsImprovement = true;
 			}
@@ -182,6 +192,8 @@ public:
 	}
 
 	Problem * startPerturbation(Problem * p, double perturbationPercentage, int * machine, int * write){
+		// cout << "Started perturbation!" << endl;
+		// p->print();
 		int totalPerturbations = p->alloc.size() * perturbationPercentage;
 		for(int i = 0; i < totalPerturbations; i++){
 			int pChooser = rand() % 2;
@@ -203,6 +215,8 @@ public:
 			p->print();
 			cin.get();
 		}
+		// cout << "Exited perturbation" << endl;
+		// p->print();
 		return p;
 	}
 
@@ -317,7 +331,7 @@ public:
 
 	Problem * startDM(){
 		// TODO: colocar os parâmetros da DM como input do algoritmo.
-		int _sizeES = 10, _suporte = 2, _gamma = 100;
+		int _sizeES = 10, _suporte = 8, _gamma = 100, _maxIter = 100;
 		
 		Mining* miner = new Mining(_sizeES, _suporte, _gamma);
 		
@@ -338,9 +352,9 @@ public:
 			//     iter++;
 
 		// cout << "Current Time: " << double(clock() - begin) / CLOCKS_PER_SEC << endl;
-		Solucao* solution;
+		Solucao* solution;		
 					
-		for(int iter = 0; iter < 10; iter++){
+		for(int iter = 0; iter < _maxIter; iter++){
 			if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time){
 				// cout << grasp_best << " " << ils_best << " ";
 				return bestSolution;
@@ -349,12 +363,20 @@ public:
 			// cout << "Iter: " << iter << endl;
 			// }
 			p = new Problem(*this->blankProblem);
-			p->createSolution(this->alpha);
+			if(iter > (int)_maxIter / 2 - 1){
+				// miner->printPatterns();
+				// miner->printCurrentPattern();
+				// cin.get();
+				p->createSolutionWithPattern(this->alpha, miner->getCurrentPattern());
+				miner->nextPattern();
+			} else
+				p->createSolution(this->alpha);
 			
 
 			// cout << "Solution created!" << endl;
-			// cout << "Cost: " << p->calculateMakespam() << endl;
+			// cout << "Cost of Construction: " << p->calculateMakespam() << endl;
 			// p->print();
+			// p->printAlloc();
 			// cin.get();
 
 			// p->printAlloc();
@@ -363,7 +385,7 @@ public:
 				cin.get();
 			}
 			// cout << "Starting first LS!" << endl;
-			p = startLocalSearch(p, begin);
+			// p = startLocalSearch(p, begin);
 			// cout << "Finished first LS!" << endl;
 			if (p->calculateMakespam() < bestSolValue){
 				delete bestSolution;
@@ -419,6 +441,8 @@ public:
 				cin.get();
 			}
 			
+			// cout << "Cost after LocalSearch: " << p->calculateMakespam() << endl;
+			// cin.get();
 			solution= new Solucao();
 			
 			solution->cost = p->calculateMakespam();
@@ -431,11 +455,18 @@ public:
 			// cout << "ITERATION: " << iter << " CURRENT BEST SOL VALUE: " << bestSolValue << endl;
 			delete p;
 			delete solution;
+			if(iter == (int)_maxIter / 2 - 1){
+				miner->map_file();
+				miner->mine();
+				miner->unmapall_file();
+			}
+			
 		}
+		
 		//miner->printES();
-		miner->map_file();
-		miner->mine();
-		miner->unmapall_file();
+		// miner->map_file();
+		// miner->mine();
+		// miner->unmapall_file();
 		//miner->printPatterns();
 		
 		// TODO: fazer o construtivo adaptado!

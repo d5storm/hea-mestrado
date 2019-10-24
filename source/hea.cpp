@@ -4,7 +4,7 @@
 #include "../include/Problem.h"
 #include "../include/Grasp.h"
 #include "../include/MILS.h"
-#include "Mining.h"
+// #include "Mining.h"
 
 typedef vector<Chromosome> vect_chrom_type;
 

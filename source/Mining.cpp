@@ -220,4 +220,14 @@ void Mining::printPatterns(){
 	}
 }
 
+void Mining::printCurrentPattern(){
+	
+	cout << "Padrão " << this->currentPattern << " | sup: " << listOfPatterns[this->currentPattern]->support << " | size: " << listOfPatterns[this->currentPattern]->size << endl << "\t";
+	for(int j = 0 ; j < listOfPatterns[this->currentPattern]->elements.size(); j++){
+		cout << "("<< listOfPatterns[this->currentPattern]->elements[j].first << "," << listOfPatterns[this->currentPattern]->elements[j].second << ") ";
+	}
+		cout << endl;
+
+}
+
 //---------------------------------------------------------------------------

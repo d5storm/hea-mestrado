@@ -50,4 +50,21 @@ Montage_50.xml 1.85 2746
 Montage_50.xml 2.21667 2746
 Montage_100.xml 6.36667 3355
 Montage_100.xml 7.5 3355
-Montage_100.xml 
+Montage_100.xml 4.96667 3355
+Montage_100.xml 4.8 3355
+Montage_100.xml 4.83333 3355
+Inspiral_30.xml 14.0333 0.5
+Inspiral_30.xml 13.9667 0.5
+Inspiral_30.xml 14.0333 0.546875
+Inspiral_30.xml 14 0.59375
+Inspiral_30.xml 14.1 0.453125
+Inspiral_50.xml 22.75 5.1875
+Inspiral_50.xml 23.05 5.26562
+Inspiral_50.xml 22.85 5.29688
+Inspiral_50.xml 22.8 5.26562
+Inspiral_50.xml 22.5667 4.875
+Inspiral_100.xml 40.9167 115.453
+Inspiral_100.xml 40.95 132.766
+Inspiral_100.xml 40.9 164.688
+Inspiral_100.xml 40.95 139.844
+Inspiral_100.xml 40.9833 131.047

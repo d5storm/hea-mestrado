@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <random>
 #include <regex>
+#include "../source/Mining.h"
 
 
 using namespace std;
@@ -289,6 +290,8 @@ public:
 			// cout << "inputFileID: " << job->input[i]->id << " isStatic: " << job->input[i]->is_static << endl;
 			if(job->input[i]->is_static == false && job->input[i]->alocated_vm_id < 0){
 				// cout << "JOB NOT AVAILABLE: FILES NOT READY" << endl; 
+				// this->print();
+				// cin.get();
 				return false;
 			}
 		}
@@ -653,9 +656,19 @@ public:
 					// this->print();
 					// this->printAlloc();
 					// cout << "#################" << endl;
+					// cout << "AllocPos: " << pos << " AllocPos2: " << pos2 << endl;
 					// cout << "JobID: " << job->id << " Job2ID: " << job2->id << endl;
-					
-					return this->execSwapMachinePair(pos, pos2, newStartTimes, newFinishTimes);
+					// cout << "JOB1VM " << job->alocated_vm_id << " JOB2VM " << job2->alocated_vm_id << endl;
+					// cout << "JobID: " << alloc[pos]->job->id << " Job2ID: " << alloc[pos2]->job->id << endl;
+					// cout << "JOB1VM " << alloc[pos]->vms->id << " JOB2VM " << alloc[pos2]->vms->id << endl;
+					// for(int i = 0; i < newStartTimes.size(); i++){
+					// 		cout << "Id: " << i << " Start: " << newStartTimes[i] << " Finish: " << newFinishTimes[i] << endl;
+					// }
+					// cin.get();
+					double aux = this->execSwapMachinePair(pos, pos2, newStartTimes, newFinishTimes);
+					// cout << "Saida do machinePair" << endl;
+					// this->print();
+					return aux;
 					// if(job->id == 8 && job2->id == 13 || job2->id == 8 && job->id == 13) {
 					// 	this->print();
 					// 	this->printAlloc();
@@ -678,6 +691,9 @@ public:
 		while(moved){
 			if(moves < 0){
 				cout << "LOOP" << endl;
+				this->print();
+				this->printAlloc();
+				cin.get();
 			}
 			moved = false;
 			for(int j = 1; j < vm->timelineJobs.size(); j++){
@@ -716,13 +732,19 @@ public:
 				// cin.get();
 			}
 		}
+		// cout << "After fix!" << endl;
+		// this->print();
 	}
 
 	double execSwapMachinePair(int pos, int pos2, vector<double>& newStartTimes, vector<double>& newFinishTimes){
+		// cout << "execSwapMachinePair" << endl;
+
 		Job * changedJob = this->alloc[pos]->job;
 		Machine * changedVm = this->alloc[pos2]->vms;
 		Job * changedJob2 = this->alloc[pos2]->job;
 		Machine * changedVm2 = this->alloc[pos]->vms;
+
+		// cout << "JOB1VM: " << changedVm2->id << " JOB2VM: " << changedVm->id << endl;
 		for(int a = 0; a < this->alloc.size(); a++){
 			Job * job = this->alloc[a]->job;
 			Machine * vm = this->alloc[a]->vms;
@@ -799,8 +821,8 @@ public:
 			}
 		}
 
-		this->alloc[pos]->vms = changedVm;
-		this->alloc[pos2]->vms = changedVm2;
+		this->alloc[pos]->vms = vms[changedJob->alocated_vm_id];
+		this->alloc[pos2]->vms = vms[changedJob2->alocated_vm_id];
 
 		// fixing order on each VM
 		// cout << "Fixing order on VMs" << endl;
@@ -1107,7 +1129,7 @@ public:
 			}
 		}
 
-		this->alloc[pos]->vms = changedVm;
+		this->alloc[pos]->vms = vms[changedJob->alocated_vm_id];
 
 		for(int vm = 0; vm < vms.size(); vm++){
 			this->fixMachineTimelineOrder(vm);
@@ -1544,9 +1566,9 @@ public:
 
 	void printAlloc(){
 		// cout << "Allocation order that created solution: " << endl;
-		// for(unsigned int i = 0; i < alloc.size(); i++){
-		// 	cout << "JobID: " << alloc[i]->job->name << " to MachineID: " << alloc[i]->vms->id << " Writing to MachineID: " << alloc[i]->writeTo << endl;
-		// }
+		for(unsigned int i = 0; i < alloc.size(); i++){
+			cout << "AllocPos: " << i << " JobID: " << alloc[i]->job->id << " to MachineID: " << alloc[i]->vms->id << " Writing to MachineID: " << alloc[i]->writeTo << endl;
+		}
 		for(unsigned int i = 0; i < alloc.size(); i++){
 			cout << alloc[i]->job->id << ", ";
 		}
@@ -1633,6 +1655,217 @@ public:
 			this->alloc.push_back(newAllocation);
 		}
 
+	}
+
+	void mergeVector(vector<Job *> * A, vector<Job *> * B){
+		for(int i = 0; i < B->size(); i++){
+			A->push_back(B->at(i));
+		}
+		delete B;
+	}
+
+	vector<Job*> * createTrail(Mining::Pattern * pattern, Job* job, vector<Job*> * patternTrail){
+		// cout << "Creating Trail for Job: " << job->id << endl;
+		// cin.get();
+		for(int p = 0; p < pattern->elements.size(); p++){
+			pair<int,int> nugget = pattern->elements[p];
+			if(get<0>(nugget) == job->id){
+				if(!jobs[get<1>(nugget)]->alocated){
+					patternTrail->push_back(jobs[get<1>(nugget)]);
+					// cout << "Starting recursive Trail from Job: " << job->id << endl;
+					vector<Job *> * newTrail = new vector<Job*>;
+					mergeVector(patternTrail, createTrail(pattern, jobs[get<1>(nugget)], newTrail));
+				}
+				return patternTrail;
+			}
+		}
+		return patternTrail;
+	}
+
+	double createSolutionWithPattern(double alpha, Mining::Pattern * pattern){
+
+		// cout << "CRIANDO COM PADRAO AGORA!" << endl;
+		// cin.get();
+		int totalJobs = jobs.size();
+		while(totalJobs > 0){
+			// cout << "************************** TOTAL JOBS: " << totalJobs << endl;
+			// cin.get();
+			vector<Job*> CL;
+			vector<int> jobVmDestination;
+			vector<int> outputVmDestination;
+			vector<double> cost;
+
+			vector<Job*> CLPattern;
+			vector<vector<Job*>*> patternTrail;
+			vector<int> jobVmDestinationPattern;
+			vector<int> outputVmDestinationPattern;
+			vector<double> costPattern;
+			for(unsigned int i = 0; i < jobs.size(); i++){
+				// cout << "i: " << i  << " JobName: "<< jobs[i]->name << endl;
+				if (jobs[i]->alocated)
+					continue;
+				for(unsigned int m = 0; m < vms.size(); m++){
+					for(unsigned int d = 0; d < vms.size(); d++){
+
+						double minSpam = getJobConflictMinSpam(jobs[i]);
+						if(minSpam < 0) break; 
+						bool pushed = vms[m]->pushJob(jobs[i], d, minSpam);
+						// cin.get();
+						if(!pushed){
+							// cout << "COULD NOT PUSH!" << endl;
+							// cin.get();
+							break;
+						}
+						double insertionCost = calculateMakespam();
+						vector<Job*> * trail = new vector<Job *>;
+						createTrail(pattern, jobs[i], trail);
+						bool hasPattern = false;
+						if(trail->size() > 0)
+							hasPattern = true;
+						// if(jobs[i]->name == "ID00002"){
+						// 	cout << "JOB: " << jobs[i]->id << " vmsID: " << vms[m]->name << " InsertionID: " << vms[d]->id <<  " COST: " << insertionCost << endl;
+						// 	cin.get();
+						// }
+						if(hasPattern){
+							// cout << "Has PAttern!" << endl;
+							if(CLPattern.size() == 0){
+								CLPattern.push_back(jobs[i]);
+								jobVmDestinationPattern.push_back(m);
+								costPattern.push_back(insertionCost);
+								outputVmDestinationPattern.push_back(d);
+								patternTrail.push_back(trail);
+							} else{
+								bool inserted = false;
+								for(unsigned int j = 0; j < costPattern.size(); j++){
+									if(costPattern[j] >= insertionCost){
+										costPattern.insert(costPattern.begin() + j, insertionCost);
+										jobVmDestinationPattern.insert(jobVmDestinationPattern.begin() + j, m);
+										CLPattern.insert(CLPattern.begin() + j, jobs[i]);
+										outputVmDestinationPattern.insert(outputVmDestinationPattern.begin() + j, d);
+										patternTrail.insert(patternTrail.begin() + j, trail);
+										inserted = true;
+										break;
+									}
+								}
+								if (!inserted){
+									costPattern.push_back(insertionCost);
+									jobVmDestinationPattern.push_back(m);
+									CLPattern.push_back(jobs[i]);
+									outputVmDestinationPattern.push_back(d);
+									patternTrail.push_back(trail);
+								}
+							}
+						} else {
+							// cout << "Dont Have PAttern!" << endl;
+							if(CL.size() == 0){
+								CL.push_back(jobs[i]);
+								jobVmDestination.push_back(m);
+								cost.push_back(insertionCost);
+								outputVmDestination.push_back(d);
+							} else{
+								bool inserted = false;
+								for(unsigned int j = 0; j < cost.size(); j++){
+									if(cost[j] >= insertionCost){
+										cost.insert(cost.begin() + j, insertionCost);
+										jobVmDestination.insert(jobVmDestination.begin() + j, m);
+										CL.insert(CL.begin() + j, jobs[i]);
+										outputVmDestination.insert(outputVmDestination.begin() + j, d);
+										inserted = true;
+										break;
+									}
+								}
+								if (!inserted){
+									cost.push_back(insertionCost);
+									jobVmDestination.push_back(m);
+									CL.push_back(jobs[i]);
+									outputVmDestination.push_back(d);
+								}
+							}
+						}
+						// cout << "tested!" << endl;
+						vms[m]->popJob(jobs[i]->id);
+						// cout << "Spam After Removal: " << vms[m]->calculateLocalspam() << endl;
+						// cin.get();
+					}
+				}
+			}
+			// cin.get();
+			if(CL.size() == 0 && CLPattern.size() == 0){
+				cout << "NO POSSIBLE MOVEMENTS!" << endl;
+				cin.get();
+			}
+			// cout << "CL size: " << CL.size() << endl;
+			// if(CL.size() > 0) {
+			// 	for(unsigned int c = 0; c < CL.size(); c++){
+			// 		cout << CL[c]->id << " " ;
+			// 	}
+			// 	cout << endl;
+			// }
+			// cout << "CLPattern size: " << CLPattern.size() << endl;
+			// if(CLPattern.size() > 0){
+			// 	cout << "****" << endl;
+			// 	for(unsigned int c = 0; c < CLPattern.size(); c++){
+			// 		cout << CLPattern[c]->id << "(Trail:  " ;
+			// 		for(int i = 0; i < patternTrail[c]->size(); i++){
+			// 			cout << "JobID: " << patternTrail[c]->at(i)->id << " "; 
+			// 		}
+			// 		cout << ") " << endl;
+			// 	}
+			// 	cout << endl;
+			// }
+			// cin.get();
+			int chosenMovement;
+			int maxClPos;
+			if(CLPattern.size() > 0){
+				maxClPos = (int)(CLPattern.size() * alpha);
+				if(maxClPos == 0)
+					chosenMovement = 0;
+				else
+					chosenMovement = random() % maxClPos;
+				bool moveDone = doMovement(jobVmDestinationPattern[chosenMovement], outputVmDestinationPattern[chosenMovement], CLPattern[chosenMovement]);
+				if(moveDone){
+					totalJobs--;
+				}
+				else{
+					cout << "JobID: " << CLPattern[chosenMovement]->id << " Was NOT Inserted!" << endl;
+					cin.get();
+				}
+				// cout << "Chosen Job: " << CLPattern[chosenMovement]->id << endl;
+				// cout << "Trail: " << endl;
+				// for(int i = 0; i < patternTrail[chosenMovement]->size(); i++){
+				// 	cout << "JobID: " << patternTrail[chosenMovement]->at(i)->id << " "; 
+				// }
+				// cout << endl;
+				// cin.get();
+				// now adding the Trail
+				for(int t = 0; t < patternTrail[chosenMovement]->size(); t++){
+					// cout << "Trying to add: " << patternTrail[chosenMovement]->at(t)->id << endl;
+					 moveDone = doMovement(jobVmDestinationPattern[chosenMovement], outputVmDestinationPattern[chosenMovement], patternTrail[chosenMovement]->at(t));
+					 if(moveDone){
+						// cout << "Adicionou Trail: " << patternTrail[chosenMovement]->at(t)->id << endl;
+						totalJobs--;
+					}
+				}
+			} else{
+				maxClPos = (int)(CL.size() * alpha);
+				if(maxClPos == 0)
+					chosenMovement = 0;
+				else
+					chosenMovement = random() % maxClPos;
+				bool moveDone = doMovement(jobVmDestination[chosenMovement], outputVmDestination[chosenMovement], CL[chosenMovement]);
+				if(moveDone){
+					totalJobs--;
+				}
+				else{
+					cout << "JobID: " << CL[chosenMovement]->id << " Was NOT Inserted!" << endl;
+					cin.get();
+				}
+			}
+			
+		}
+		// this->print();
+		// this->printAlloc();
+		// cin.get();
 	}
 
 	double createSolution(double alpha){
@@ -1905,12 +2138,17 @@ public:
 	}
 
 	bool doMovement(int vm, int output, Job* job){
+		bool added = vms[vm]->pushJob(job, output, getJobConflictMinSpam(job));
+		if(!added)
+			return false;
 		Allocation * newAlloc = new Allocation();
 		newAlloc->job = job;
 		newAlloc->vms = vms[vm];
 		newAlloc->writeTo = output;
 		alloc.push_back(newAlloc);
-		return vms[vm]->pushJob(job, output, getJobConflictMinSpam(job));
+		// cout << "Do Movement!!! Job: " << job->id << " vm: " << vms[vm]->id  << endl;
+		// this->printAlloc();
+		return true;
 	}
 
 	void print(){

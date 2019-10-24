@@ -27,7 +27,22 @@ class Solucao{
 
 class Mining{
 	// Forward declaration
-	class Pattern;
+
+	public:
+		class Pattern{
+				public:	
+					vector<pair<int,int>> elements;	//
+					int support,size;
+					Pattern(){  elements = std::vector<pair<int,int>>(); support = 0; size = 0;};
+					~Pattern(){ elements.clear();};
+					// Assignment operator overload 
+					Pattern &operator=(const Pattern &other) {
+						support = other.support;
+						size = other.size;
+						elements = other.elements;
+						return *this;
+					}
+			};
 
 	private:	
 		int nPatterns,sizeES,maxSizeES, min_sup, min_sup_orig, worstCostPos, currentPattern, gamma,nJobs;
@@ -37,20 +52,7 @@ class Mining{
 		bool eschanged,mined;
 		int iterWNC, numberMine;
 		
-		class Pattern{
-			public:	
-				vector<pair<int,int>> elements;	//
-				int support,size;
-				Pattern(){  elements = std::vector<pair<int,int>>(); support = 0; size = 0;};
-				~Pattern(){ elements.clear();};
-				// Assignment operator overload 
-				Pattern &operator=(const Pattern &other) {
-					support = other.support;
-					size = other.size;
-					elements = other.elements;
-					return *this;
-				}
-		};
+		
 	
 	
 	public:
@@ -61,6 +63,7 @@ class Mining{
 		void map_file();
 		void unmapall_file();
 		void printPatterns();
+		void printCurrentPattern();
 		
 		///// Manipula Conjunto Elite
 		void printES();
