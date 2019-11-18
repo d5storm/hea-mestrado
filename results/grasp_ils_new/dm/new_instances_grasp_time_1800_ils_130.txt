@@ -1,0 +1,43 @@
+./input/Workflows/CYBERSHAKE.n.200.19.dax.dag 17.6667 1801.09
+./input/Workflows/CYBERSHAKE.n.200.19.dax.dag 30.2333 1802.06
+./input/Workflows/CYBERSHAKE.n.200.19.dax.dag 32.8833 1800.92
+./input/Workflows/CYBERSHAKE.n.200.19.dax.dag 17.6 1801.45
+./input/Workflows/CYBERSHAKE.n.200.19.dax.dag 25.8833 1801.19
+./input/Workflows/CYBERSHAKE.n.200.19.dax.dag 20.55 1801.02
+./input/Workflows/CYBERSHAKE.n.200.19.dax.dag 20.9167 1800.86
+./input/Workflows/CYBERSHAKE.n.200.19.dax.dag 34.5 1801.61
+./input/Workflows/CYBERSHAKE.n.200.19.dax.dag 19.5333 1800.19
+./input/Workflows/CYBERSHAKE.n.200.19.dax.dag 26.9 1800.19
+./input/Workflows/CYBERSHAKE.n.300.19.dax.dag 90.4167 1800.52
+./input/Workflows/CYBERSHAKE.n.300.19.dax.dag 79.5167 1800.05
+./input/Workflows/CYBERSHAKE.n.300.19.dax.dag 84.7 1800.69
+./input/Workflows/CYBERSHAKE.n.300.19.dax.dag 44 1800.27
+./input/Workflows/CYBERSHAKE.n.300.19.dax.dag 43.15 1800.59
+./input/Workflows/CYBERSHAKE.n.300.19.dax.dag 33.8833 1827.36
+./input/Workflows/CYBERSHAKE.n.300.19.dax.dag 50.2333 1807.72
+./input/Workflows/CYBERSHAKE.n.300.19.dax.dag 33.1667 1800.36
+./input/Workflows/CYBERSHAKE.n.300.19.dax.dag 41.75 1830.95
+./input/Workflows/CYBERSHAKE.n.300.19.dax.dag 38.8667 1813.03
+./input/Workflows/MONTAGE.n.200.0.dax.dag 16.8667 1800
+./input/Workflows/MONTAGE.n.200.0.dax.dag 11.4167 1800
+./input/Workflows/MONTAGE.n.200.0.dax.dag 13.0833 1800
+./input/Workflows/MONTAGE.n.200.0.dax.dag 13.5667 1800
+./input/Workflows/MONTAGE.n.200.0.dax.dag 16.8333 1800
+./input/Workflows/MONTAGE.n.200.0.dax.dag 13.35 1800.02
+./input/Workflows/MONTAGE.n.200.0.dax.dag 14.8333 1800
+./input/Workflows/MONTAGE.n.200.0.dax.dag 14.1833 1800
+./input/Workflows/MONTAGE.n.200.0.dax.dag 12.8333 1800.02
+./input/Workflows/MONTAGE.n.200.0.dax.dag 13.4833 1800
+./input/Workflows/MONTAGE.n.300.0.dax.dag 13.8667 1800
+./input/Workflows/MONTAGE.n.300.0.dax.dag 18.1167 1800.02
+./input/Workflows/MONTAGE.n.300.0.dax.dag 14.2667 1800.02
+./input/Workflows/MONTAGE.n.300.0.dax.dag 13.4333 1800
+./input/Workflows/MONTAGE.n.300.0.dax.dag 14.0833 1800
+./input/Workflows/MONTAGE.n.300.0.dax.dag 14.7167 1800.02
+./input/Workflows/MONTAGE.n.300.0.dax.dag 14.9 1800
+./input/Workflows/MONTAGE.n.300.0.dax.dag 19.95 1800.02
+./input/Workflows/MONTAGE.n.300.0.dax.dag 16 1800
+./input/Workflows/MONTAGE.n.300.0.dax.dag 14.65 1800
+./input/Workflows/SIPHT.n.300.0.dax.dag JobID: 30 Was NOT Inserted!
+JobID: 30 Was NOT Inserted!
+JobID: 30 Was NOT Inserted!

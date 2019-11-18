@@ -21,9 +21,10 @@ struct Settings_struct {
 
     float time_limit;                 // Run time limite in seconds
     int print_gen;                   // What generation will be printed
-    bool verbose, start_heuristic;  // verbose = print type, start_heuristic = Initial Population type
+    bool verbose, start_heuristic, useTime;  // verbose = print type, start_heuristic = Initial Population type
 
     int seed;      // Random Seed
+    int maxIter, maxILS;
 
     double delta = 0.0; // acceptance criteria for Elite-Set (based on distance)
     double lambda;  // read and write constant
@@ -42,7 +43,11 @@ struct Settings_struct {
 
         print_gen = 10;
 
+        maxIter = INT_MAX;
+        maxILS = 10;
+
         verbose = false;
+        useTime = false;
         start_heuristic = true;
 
         howMany_elistism = (int) ceil(num_chromosomes * elitism_rate);
@@ -543,6 +548,11 @@ void setupCmd(int argc, char **argv, string &name_workflow, string &name_cluster
         cmd.add(arg5);
         ValueArg<string> arg6("t", "time", "Value of max time", false, "file", "string");
         cmd.add(arg6);
+        ValueArg<string> arg7("i", "ils", "Value of maxILS", false, "file", "string");
+        cmd.add(arg7);
+        ValueArg<string> arg8("g", "grasp", "Value of maxIter", false, "file", "string");
+        cmd.add(arg8);
+        SwitchArg fixedTime_arg("f", "timelimit", "If GRASP uses iteration of time", cmd, false);
         SwitchArg verbose_arg("v", "verbose", "Output info", cmd, false);
 
         // Parse the args.
@@ -557,6 +567,11 @@ void setupCmd(int argc, char **argv, string &name_workflow, string &name_cluster
         setting->mutation_probability = stoi(arg5.getValue()) / 100.0;
         setting->time_limit = stod(arg6.getValue());
         setting->verbose = verbose_arg.getValue();
+        setting->useTime = fixedTime_arg.getValue();
+        setting->maxILS = stoi(arg7.getValue());
+        if(!setting->useTime)
+            setting->maxIter = stoi(arg8.getValue());
+
 
     } catch (ArgException &e) {  // catch any exceptions
         cerr << "error: " << e.error() << " for arg " << e.argId() << endl;
@@ -575,9 +590,11 @@ int main(int argc, char **argv) {
 
     srandom(setting->seed);
     
+    // cout << "UseTime: " << setting->useTime << " maxTime: " << setting->time_limit << " maxIter: " << setting->maxIter << " maxILS: " << setting->maxILS << endl;
+    // cin.get();
     Problem * emptyProblem = new Problem(name_workflow, name_cluster);
     // cout << "Alpha: " << setting->alpha << endl;
-    // cout << name_workflow << " ";
+    cout << name_workflow << " ";
     Mils * g = new Mils(emptyProblem, setting->alpha, setting->mutation_probability);
     // Grasp * g = new Grasp(emptyProblem, setting->alpha);
 
@@ -586,7 +603,11 @@ int main(int argc, char **argv) {
     // cin.get();
     clock_t begin = clock();
     g->max_time = max_time;
-    Problem * bestSol = g->startDM();
+    g->maxIter = setting->maxIter;
+    g->maxILS = setting->maxILS;
+    g->useTime = setting->useTime;
+    // Problem * bestSol = g->startDM();
+    Problem * bestSol = g->start();
     clock_t end = clock();
     double elapseSecs = double(end - begin) / CLOCKS_PER_SEC;
     double bestSolValue = bestSol->calculateMakespam();

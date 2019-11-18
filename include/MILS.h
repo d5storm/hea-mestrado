@@ -19,6 +19,8 @@ public:
 	double perturbationPercentage;
 	Problem * blankProblem;
 	double max_time = double(INT_MAX);
+	double maxIter, maxILS;
+	bool useTime;
 	vector<LocalSearch *> localSearch;
 	//virtual ~Chromosome();
 	virtual ~Mils() {
@@ -36,7 +38,7 @@ public:
 
 		bool improvement = true;
 		while(improvement){
-			if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time){
+			if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time && useTime){
 				// cout << grasp_best << " " << ils_best << " ";
 				return p;
 			}
@@ -238,9 +240,9 @@ public:
 		//     iter++;
 
 		// cout << "Current Time: " << double(clock() - begin) / CLOCKS_PER_SEC << endl;
-
-		for(int iter = 0; iter < 10; iter++){
-			if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time){
+		// cout << "maxIter: " << maxIter << endl;
+		for(int iter = 0; iter < maxIter; iter++){
+			if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time && useTime){
 				// cout << grasp_best << " " << ils_best << " ";
 				return bestSolution;
 			}
@@ -270,7 +272,7 @@ public:
 				bestSolOrigin = "LocalSearch1";
 			}
 
-			if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time){
+			if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time && useTime){
 				// cout << grasp_best << " " << ils_best << " ";
 				return bestSolution;
 			}
@@ -278,8 +280,8 @@ public:
 			// cout << "Starting ILS" << endl;
 			// cin.get();
 			double lastPvalue = p->calculateMakespam();
-			for(int mov = 0; mov < 10; mov++){
-				if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time) {
+			for(int mov = 0; mov < maxILS; mov++){
+				if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time && useTime) {
 					// cout << grasp_best << " " << ils_best << " ";
 					return bestSolution;
 				}
@@ -307,7 +309,7 @@ public:
 					delete p;
 					p = backupP;
 				}
-				if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time){
+				if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time && useTime){
 					// cout << grasp_best << " " << ils_best << " ";
 					return bestSolution;
 				}
@@ -331,7 +333,7 @@ public:
 
 	Problem * startDM(){
 		// TODO: colocar os parâmetros da DM como input do algoritmo.
-		int _sizeES = 10, _suporte = 8, _gamma = 100, _maxIter = 100;
+		int _sizeES = 10, _suporte = 8, _gamma = 100, _maxIter = maxIter, _maxILS = maxILS;
 		
 		Mining* miner = new Mining(_sizeES, _suporte, _gamma);
 		
@@ -355,7 +357,7 @@ public:
 		Solucao* solution;		
 					
 		for(int iter = 0; iter < _maxIter; iter++){
-			if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time){
+			if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time && useTime){
 				// cout << grasp_best << " " << ils_best << " ";
 				return bestSolution;
 			}
@@ -394,7 +396,7 @@ public:
 				bestSolOrigin = "LocalSearch1";
 			}
 
-			if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time){
+			if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time && useTime){
 				// cout << grasp_best << " " << ils_best << " ";
 				return bestSolution;
 			}
@@ -402,8 +404,8 @@ public:
 			// cout << "Starting ILS" << endl;
 			// cin.get();
 			double lastPvalue = p->calculateMakespam();
-			for(int mov = 0; mov < 10; mov++){
-				if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time) {
+			for(int mov = 0; mov < _maxILS; mov++){
+				if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time && useTime) {
 					// cout << grasp_best << " " << ils_best << " ";
 					return bestSolution;
 				}
@@ -431,7 +433,7 @@ public:
 					delete p;
 					p = backupP;
 				}
-				if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time){
+				if(double(clock() - begin) / CLOCKS_PER_SEC >= max_time && useTime){
 					// cout << grasp_best << " " << ils_best << " ";
 					return bestSolution;
 				}
